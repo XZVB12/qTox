@@ -1,5 +1,5 @@
 /*
-    Copyright © 2019 by The qTox Project Contributors
+    Copyright © 2020 by The qTox Project Contributors
 
     This file is part of qTox, a Qt-based graphical interface for Tox.
 
@@ -17,24 +17,19 @@
     along with qTox.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef I_DIALOGS_H
-#define I_DIALOGS_H
+#ifndef TOXCLIENTSTANDARDS_H
+#define TOXCLIENTSTANDARDS_H
 
-class ContactId;
-class GroupId;
-class ToxPk;
+#include <cstdint>
 
-class IDialogs
+namespace ToxClientStandards
 {
-public:
-    virtual ~IDialogs() = default;
-    virtual bool hasContact(const ContactId& contactId) const = 0;
-    virtual bool isContactActive(const ContactId& contactId) const = 0;
+    // From TCS 2.2.4, max valid avatar size is 64KiB
+    constexpr static uint64_t MaxAvatarSize = 64 * 1024;
+    constexpr bool IsValidAvatarSize(uint64_t fileSize)
+    {
+        return fileSize <= MaxAvatarSize;
+    }
+} // ToxClientStandards
 
-    virtual void removeFriend(const ToxPk& friendPk) = 0;
-    virtual void removeGroup(const GroupId& groupId) = 0;
-
-    virtual int chatroomCount() const = 0;
-};
-
-#endif // I_DIALOGS_H
+#endif // TOXCLIENTSTANDARDS_H

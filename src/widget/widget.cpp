@@ -139,7 +139,6 @@ Widget* Widget::instance{nullptr};
 
 Widget::Widget(IAudioControl& audio, QWidget* parent)
     : QMainWindow(parent)
-    , icon{nullptr}
     , trayMenu{nullptr}
     , ui(new Ui::MainWindow)
     , activeChatroomWidget{nullptr}
@@ -362,7 +361,7 @@ void Widget::init()
 
     fileMenu->menu()->addSeparator();
     logoutAction = fileMenu->menu()->addAction(QString());
-    connect(logoutAction, &QAction::triggered, [this]() { Nexus::getInstance().showLogin(); });
+    connect(logoutAction, &QAction::triggered, []() { Nexus::getInstance().showLogin(); });
 
     editMenu = globalMenu->insertMenu(viewMenu, new QMenu(this));
     editMenu->menu()->addSeparator();
@@ -1396,7 +1395,6 @@ void Widget::onReceiptReceived(int friendId, ReceiptNum receipt)
 
 void Widget::addFriendDialog(const Friend* frnd, ContentDialog* dialog)
 {
-    uint32_t friendId = frnd->getId();
     const ToxPk& friendPk = frnd->getPublicKey();
     ContentDialog* contentDialog = ContentDialogManager::getInstance()->getFriendDialog(friendPk);
     bool isSeparate = settings.getSeparateWindow();
@@ -1432,11 +1430,11 @@ void Widget::addFriendDialog(const Friend* frnd, ContentDialog* dialog)
             [=](QContextMenuEvent* event) { emit widget->contextMenuCalled(event); });
 
     connect(friendWidget, &FriendWidget::chatroomWidgetClicked, [=](GenericChatroomWidget* w) {
-        Q_UNUSED(w);
+        Q_UNUSED(w)
         emit widget->chatroomWidgetClicked(widget);
     });
     connect(friendWidget, &FriendWidget::newWindowOpened, [=](GenericChatroomWidget* w) {
-        Q_UNUSED(w);
+        Q_UNUSED(w)
         emit widget->newWindowOpened(widget);
     });
     // FIXME: emit should be removed
@@ -1484,12 +1482,12 @@ void Widget::addGroupDialog(Group* group, ContentDialog* dialog)
     // ContentDialog) to the `widget` (which shown in main widget)
     // FIXME: emit should be removed
     connect(groupWidget, &GroupWidget::chatroomWidgetClicked, [=](GenericChatroomWidget* w) {
-        Q_UNUSED(w);
+        Q_UNUSED(w)
         emit widget->chatroomWidgetClicked(widget);
     });
 
     connect(groupWidget, &GroupWidget::newWindowOpened, [=](GenericChatroomWidget* w) {
-        Q_UNUSED(w);
+        Q_UNUSED(w)
         emit widget->newWindowOpened(widget);
     });
 
@@ -1960,8 +1958,7 @@ void Widget::onGroupMessageReceived(int groupnumber, int peernumber, const QStri
                                     bool isAction)
 {
     const GroupId& groupId = GroupList::id2Key(groupnumber);
-    Group* g = GroupList::findGroup(groupId);
-    assert(g);
+    assert(GroupList::findGroup(groupId));
 
     ToxPk author = core->getGroupPeerPk(groupnumber, peernumber);
 
@@ -2012,8 +2009,7 @@ void Widget::titleChangedByUser(const QString& title)
 void Widget::onGroupPeerAudioPlaying(int groupnumber, ToxPk peerPk)
 {
     const GroupId& groupId = GroupList::id2Key(groupnumber);
-    Group* g = GroupList::findGroup(groupId);
-    assert(g);
+    assert(GroupList::findGroup(groupId));
 
     auto form = groupChatForms[groupId].data();
     form->peerAudioPlaying(peerPk);
@@ -2314,8 +2310,7 @@ void Widget::setStatusBusy()
 void Widget::onGroupSendFailed(uint32_t groupnumber)
 {
     const auto& groupId = GroupList::id2Key(groupnumber);
-    Group* g = GroupList::findGroup(groupId);
-    assert(g);
+    assert(GroupList::findGroup(groupId));
 
     const auto message = tr("Message failed to send");
     const auto curTime = QDateTime::currentDateTime();
@@ -2356,8 +2351,8 @@ void Widget::saveSplitterGeometry()
 
 void Widget::onSplitterMoved(int pos, int index)
 {
-    Q_UNUSED(pos);
-    Q_UNUSED(index);
+    Q_UNUSED(pos)
+    Q_UNUSED(index)
     saveSplitterGeometry();
 }
 

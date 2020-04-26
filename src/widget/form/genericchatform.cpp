@@ -258,7 +258,7 @@ GenericChatForm::GenericChatForm(const Contact* contact, IChatLog& chatLog,
     headWidget = new ChatFormHeader();
     searchForm = new SearchForm();
     dateInfo = new QLabel(this);
-    chatWidget = new ChatLog(contact->useHistory(), this);
+    chatWidget = new ChatLog(this);
     chatWidget->setBusyNotification(ChatMessage::createBusyNotification());
     searchForm->hide();
     dateInfo->setAlignment(Qt::AlignHCenter);
@@ -728,7 +728,7 @@ bool GenericChatForm::loadHistoryFrom(const QDateTime &time)
 
 void GenericChatForm::removeFirstsMessages(const int num)
 {
-    if (messages.size() > num) {
+    if (static_cast<int>(messages.size()) > num) {
         messages.erase(messages.begin(), std::next(messages.begin(), num));
     } else {
         messages.clear();
@@ -737,7 +737,7 @@ void GenericChatForm::removeFirstsMessages(const int num)
 
 void GenericChatForm::removeLastsMessages(const int num)
 {
-    if (messages.size() > num) {
+    if (static_cast<int>(messages.size()) > num) {
         messages.erase(std::next(messages.end(), -num), messages.end());
     } else {
         messages.clear();
@@ -1120,9 +1120,9 @@ void GenericChatForm::renderMessages(ChatLogIdx begin, ChatLogIdx end,
         if (onCompletion) {
             auto connection = std::make_shared<QMetaObject::Connection>();
             *connection = connect(chatWidget, &ChatLog::workerTimeoutFinished,
-                                  [onCompletion, connection] {
+                                  [this, onCompletion, connection] {
                                       onCompletion();
-                                      disconnect(*connection);
+                                      this->disconnect(*connection);
                                   });
         }
 

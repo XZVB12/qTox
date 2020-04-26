@@ -243,10 +243,6 @@ void Settings::loadGlobal()
         outVolume = s.value("outVolume", 100).toInt();
         enableTestSound = s.value("enableTestSound", true).toBool();
         audioBitrate = s.value("audioBitrate", 64).toInt();
-        enableBackend2 = false;
-#ifdef USE_FILTERAUDIO
-        enableBackend2 = s.value("enableBackend2", false).toBool();
-#endif
     }
     s.endGroup();
 
@@ -392,7 +388,7 @@ bool Settings::applyCommandLineOptions(const QCommandLineParser& parser)
 {
     if (!verifyProxySettings(parser)) {
         return false;
-    };
+    }
 
     QString IPv6Setting = parser.value("I").toUpper();
     QString LANSetting = parser.value("L").toUpper();
@@ -714,7 +710,6 @@ void Settings::saveGlobal()
         s.setValue("outVolume", outVolume);
         s.setValue("enableTestSound", enableTestSound);
         s.setValue("audioBitrate", audioBitrate);
-        s.setValue("enableBackend2", enableBackend2);
     }
     s.endGroup();
 
@@ -1010,7 +1005,7 @@ void Settings::setAutorun(bool newValue)
         emit autorunChanged(autorun);
     }
 #else
-    Q_UNUSED(newValue);
+    Q_UNUSED(newValue)
 #endif
 }
 
@@ -2012,22 +2007,6 @@ void Settings::setAudioBitrate(int bitrate)
     }
 }
 
-bool Settings::getEnableBackend2() const
-{
-    QMutexLocker locker{&bigLock};
-    return enableBackend2;
-}
-
-void Settings::setEnableBackend2(bool enabled)
-{
-    QMutexLocker locker{&bigLock};
-
-    if (enabled != enableBackend2) {
-        enableBackend2 = enabled;
-        emit enableBackend2Changed(enabled);
-    }
-}
-
 QRect Settings::getScreenRegion() const
 {
     QMutexLocker locker(&bigLock);
@@ -2166,7 +2145,7 @@ void Settings::setFriendActivity(const ToxPk& id, const QDateTime& activity)
 
 void Settings::saveFriendSettings(const ToxPk& id)
 {
-    Q_UNUSED(id);
+    Q_UNUSED(id)
     savePersonal();
 }
 
