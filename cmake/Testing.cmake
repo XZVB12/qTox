@@ -47,6 +47,8 @@ auto_test(model friendmessagedispatcher)
 auto_test(model groupmessagedispatcher)
 auto_test(model messageprocessor)
 auto_test(model sessionchatlog)
+auto_test(model exiftransform)
+auto_test(model notificationgenerator)
 
 if (UNIX)
   auto_test(platform posixsignalnotifier)

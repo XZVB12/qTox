@@ -17,8 +17,7 @@
     along with qTox.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef WIDGET_H
-#define WIDGET_H
+#pragma once
 
 #include "ui_mainwindow.h"
 
@@ -29,8 +28,8 @@
 
 #include "genericchatitemwidget.h"
 
-#include "src/audio/iaudiocontrol.h"
-#include "src/audio/iaudiosink.h"
+#include "audio/iaudiocontrol.h"
+#include "audio/iaudiosink.h"
 #include "src/core/core.h"
 #include "src/core/groupid.h"
 #include "src/core/toxfile.h"
@@ -39,6 +38,7 @@
 #include "src/model/friendmessagedispatcher.h"
 #include "src/model/groupmessagedispatcher.h"
 #if DESKTOP_NOTIFICATIONS
+#include "src/model/notificationgenerator.h"
 #include "src/platform/desktop_notifications/desktopnotify.h"
 #endif
 
@@ -117,7 +117,7 @@ private:
     };
 
 public:
-    explicit Widget(IAudioControl& audio, QWidget* parent = nullptr);
+    explicit Widget(Profile& _profile, IAudioControl& audio, QWidget* parent = nullptr);
     ~Widget() override;
     void init();
     void setCentralWidget(QWidget* widget, const QString& widgetName);
@@ -128,7 +128,7 @@ public:
     void addFriendDialog(const Friend* frnd, ContentDialog* dialog);
     void addGroupDialog(Group* group, ContentDialog* dialog);
     bool newFriendMessageAlert(const ToxPk& friendId, const QString& text, bool sound = true,
-                               bool file = false);
+                               QString filename = QString(), size_t filesize = 0);
     bool newGroupMessageAlert(const GroupId& groupId, const ToxPk& authorPk, const QString& message,
                               bool notify);
     bool getIsWindowMinimized();
@@ -275,8 +275,10 @@ private:
     void openDialog(GenericChatroomWidget* widget, bool newWindow);
     void playNotificationSound(IAudioSink::Sound sound, bool loop = false);
     void cleanupNotificationSound();
+    void acceptFileTransfer(const ToxFile &file, const QString &path);
 
 private:
+    Profile& profile;
     std::unique_ptr<QSystemTrayIcon> icon;
     QMenu* trayMenu;
     QAction* statusOnline;
@@ -359,6 +361,7 @@ private:
 
     MessageProcessor::SharedParams sharedMessageProcessorParams;
 #if DESKTOP_NOTIFICATIONS
+    std::unique_ptr<NotificationGenerator> notificationGenerator;
     DesktopNotify notifier;
 #endif
 
@@ -376,5 +379,3 @@ private:
 };
 
 bool toxActivateEventHandler(const QByteArray& data);
-
-#endif // WIDGET_H

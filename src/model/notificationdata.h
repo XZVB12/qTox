@@ -1,5 +1,5 @@
 /*
-    Copyright © 2014-2019 by The qTox Project Contributors
+    Copyright © 2020 by The qTox Project Contributors
 
     This file is part of qTox, a Qt-based graphical interface for Tox.
 
@@ -17,18 +17,14 @@
     along with qTox.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include <memory>
+#pragma once
 
-#include "src/audio/audio.h"
-#include "src/audio/iaudiosettings.h"
-#include "src/audio/backend/openal.h"
+#include <QString>
+#include <QPixmap>
 
-/**
- * @brief Select the audio backend
- * @param settings Audio settings to use
- * @return Audio backend selection based on settings
- */
-std::unique_ptr<IAudioControl> Audio::makeAudio(IAudioSettings& settings)
+struct NotificationData
 {
-    return std::unique_ptr<IAudioControl>(new OpenAL());
-}
+    QString title;
+    QString message;
+    QPixmap pixmap;
+};

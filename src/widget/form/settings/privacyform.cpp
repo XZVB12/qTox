@@ -23,8 +23,10 @@
 #include <QDebug>
 #include <QFile>
 #include <QMessageBox>
-#if (QT_VERSION >= QT_VERSION_CHECK(5, 15, 0))
+#if (QT_VERSION >= QT_VERSION_CHECK(5, 10, 0))
 #include <QRandomGenerator>
+#else
+#include <QDateTime>
 #endif
 
 #include "src/core/core.h"
@@ -39,9 +41,10 @@
 #include "src/widget/translator.h"
 #include "src/widget/widget.h"
 
-PrivacyForm::PrivacyForm()
+PrivacyForm::PrivacyForm(Core* _core)
     : GenericForm(QPixmap(":/img/settings/privacy.png"))
     , bodyUI(new Ui::PrivacySettings)
+    , core{_core}
 {
     bodyUI->setupUi(this);
 
@@ -85,14 +88,15 @@ void PrivacyForm::on_nospamLineEdit_editingFinished()
 
     bool ok;
     uint32_t nospam = newNospam.toLongLong(&ok, 16);
-    if (ok)
-        Core::getInstance()->setNospam(nospam);
+    if (ok) {
+        core->setNospam(nospam);
+    }
 }
 
 void PrivacyForm::showEvent(QShowEvent*)
 {
     const Settings& s = Settings::getInstance();
-    bodyUI->nospamLineEdit->setText(Core::getInstance()->getSelfId().getNoSpamString());
+    bodyUI->nospamLineEdit->setText(core->getSelfId().getNoSpamString());
     bodyUI->cbTypingNotification->setChecked(s.getTypingNotification());
     bodyUI->cbKeepHistory->setChecked(Settings::getInstance().getEnableLogging());
     bodyUI->blackListTextEdit->setText(s.getBlackList().join('\n'));
@@ -100,23 +104,20 @@ void PrivacyForm::showEvent(QShowEvent*)
 
 void PrivacyForm::on_randomNosapamButton_clicked()
 {
-    QTime time = QTime::currentTime();
-#if (QT_VERSION >= QT_VERSION_CHECK(5, 15, 0))
-    QRandomGenerator(static_cast<uint>(time.msec()));
-#else
-    qsrand(static_cast<uint>(time.msec()));
-#endif
-
     uint32_t newNospam{0};
-    for (int i = 0; i < 4; ++i)
-#if (QT_VERSION >= QT_VERSION_CHECK(5, 15, 0))
-        newNospam = (newNospam << 8) + (QRandomGenerator::global()->generate() % 256); // Generate byte by byte. For some reason.
+
+#if (QT_VERSION >= QT_VERSION_CHECK(5, 10, 0))
+    // guarantees to give a random 32-bit unsigned integer
+    newNospam = QRandomGenerator::global()->generate();
 #else
-        newNospam = (newNospam << 8) + (qrand() % 256); // Generate byte by byte. For some reason.
+    qsrand(static_cast<uint>(QDateTime::currentMSecsSinceEpoch()));
+    for (int i = 0; i < 4; ++i)
+        // Generate byte by byte, as qrand() is guaranteed to have only 15 bits of randomness (RAND_MAX is guaranteed to be 2^15)
+        newNospam = (newNospam << 8) + (static_cast<int>((static_cast<double>(qrand()) / static_cast<double>(RAND_MAX+1l)) * 256));
 #endif
 
-    Core::getInstance()->setNospam(newNospam);
-    bodyUI->nospamLineEdit->setText(Core::getInstance()->getSelfId().getNoSpamString());
+    core->setNospam(newNospam);
+    bodyUI->nospamLineEdit->setText(core->getSelfId().getNoSpamString());
 }
 
 void PrivacyForm::on_nospamLineEdit_textChanged()

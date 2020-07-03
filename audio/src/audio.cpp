@@ -1,5 +1,5 @@
 /*
-    Copyright © 2015-2019 by The qTox Project Contributors
+    Copyright © 2014-2019 by The qTox Project Contributors
 
     This file is part of qTox, a Qt-based graphical interface for Tox.
 
@@ -16,22 +16,19 @@
     You should have received a copy of the GNU General Public License
     along with qTox.  If not, see <http://www.gnu.org/licenses/>.
 */
-#ifndef INSTALLOSX_H
-#define INSTALLOSX_H
 
-#include <QtCore/qsystemdetection.h>
+#include <memory>
 
-#ifndef Q_OS_OSX
-#error "This file is only meant to be compiled for Mac OSX targets"
-#endif
+#include "audio/audio.h"
+#include "audio/iaudiosettings.h"
+#include "backend/openal.h"
 
-namespace osx {
-static constexpr int EXIT_UPDATE_MACX =
-    218; // We track our state using unique exit codes when debugging
-static constexpr int EXIT_UPDATE_MACX_FAIL = 216;
-
-void moveToAppFolder();
-void migrateProfiles();
+/**
+ * @brief Select the audio backend
+ * @param settings Audio settings to use
+ * @return Audio backend selection based on settings
+ */
+std::unique_ptr<IAudioControl> Audio::makeAudio(IAudioSettings& settings)
+{
+    return std::unique_ptr<IAudioControl>(new OpenAL(settings));
 }
-
-#endif // INSTALLOSX_H

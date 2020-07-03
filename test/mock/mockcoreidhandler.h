@@ -1,5 +1,5 @@
 /*
-    Copyright © 2019 by The qTox Project Contributors
+    Copyright © 2020 by The qTox Project Contributors
 
     This file is part of qTox, a Qt-based graphical interface for Tox.
 
@@ -17,33 +17,29 @@
     along with qTox.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef ALSOURCE_H
-#define ALSOURCE_H
+#pragma once
 
-#include "src/audio/iaudiosource.h"
-#include <QMutex>
-#include <QObject>
+#include "src/core/icoreidhandler.h"
 
-class OpenAL;
-class AlSource : public IAudioSource
+#include <tox/tox.h>
+
+class MockCoreIdHandler : public ICoreIdHandler
 {
-    Q_OBJECT
 public:
-    AlSource(OpenAL& al);
-    AlSource(AlSource& src) = delete;
-    AlSource& operator=(const AlSource&) = delete;
-    AlSource(AlSource&& other) = delete;
-    AlSource& operator=(AlSource&& other) = delete;
-    ~AlSource();
+    ToxId getSelfId() const override
+    {
+        std::terminate();
+        return ToxId();
+    }
 
-    operator bool() const;
+    ToxPk getSelfPublicKey() const override
+    {
+        static uint8_t id[TOX_PUBLIC_KEY_SIZE] = {0};
+        return ToxPk(id);
+    }
 
-    void kill();
-
-private:
-    OpenAL& audio;
-    bool killed = false;
-    mutable QMutex killLock;
+    QString getUsername() const override
+    {
+        return "me";
+    }
 };
-
-#endif // ALSOURCE_H

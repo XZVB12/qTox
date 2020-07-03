@@ -17,14 +17,13 @@
     along with qTox.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef ALSINK_H
-#define ALSINK_H
+#pragma once
 
 #include <QMutex>
 #include <QObject>
 
-#include "src/model/interface.h"
-#include "src/audio/iaudiosink.h"
+#include "util/interface.h"
+#include "audio/iaudiosink.h"
 
 class OpenAL;
 class QMutex;
@@ -49,8 +48,8 @@ public:
     uint getSourceId() const;
     void kill();
 
-    SIGNAL_IMPL(AlSink, finishedPlaying)
-    SIGNAL_IMPL(AlSink, invalidated)
+    SIGNAL_IMPL(AlSink, finishedPlaying, void)
+    SIGNAL_IMPL(AlSink, invalidated, void)
 
 private:
     OpenAL& audio;
@@ -58,5 +57,3 @@ private:
     bool killed = false;
     mutable QMutex killLock;
 };
-
-#endif // ALSINK_H

@@ -17,8 +17,7 @@
     along with qTox.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef IGROUP_SETTINGS_H
-#define IGROUP_SETTINGS_H
+#pragma once
 
 #include <QStringList>
 
@@ -28,8 +27,4 @@ public:
     virtual ~IGroupSettings() = default;
     virtual QStringList getBlackList() const = 0;
     virtual void setBlackList(const QStringList& blist) = 0;
-    virtual bool getGroupAlwaysNotify() const = 0;
-    virtual void setGroupAlwaysNotify(bool newValue) = 0;
 };
-
-#endif /*IGROUP_SETTINGS_H*/

@@ -2,7 +2,7 @@
 
 # MIT License
 #
-# Copyright (c) 2017-2018 Maxim Biro <nurupo.contributions@gmail.com>
+# Copyright (c) 2017-2020 Maxim Biro <nurupo.contributions@gmail.com>
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -138,7 +138,9 @@ apt-get install -y --no-install-recommends \
                    libtool \
                    nsis \
                    pkg-config \
+                   python3-pefile \
                    tclsh \
+                   texinfo \
                    unzip \
                    wget \
                    yasm \
@@ -159,7 +161,7 @@ fi
 
 # Install wine to run qTox tests in
 set +u
-if [[ "$TRAVIS_CI_STAGE" == "stage3" ]]
+if [ -z "$TRAVIS_CI_STAGE" ] || [[ "$TRAVIS_CI_STAGE" == "stage3" ]]
 then
   dpkg --add-architecture i386
   apt-get update
@@ -201,8 +203,8 @@ check_sha256_git()
     exit 1
   fi
   # Create a file listing hashes of all the files except .git/*
-  find . -type f | grep -v "^./.git" | LC_COLLATE=C sort --stable --ignore-case | xargs sha256sum > /tmp/hashes.sha
-  check_sha256 "$1" "/tmp/hashes.sha"
+  find . -type f | grep -v "^./.git" | LC_COLLATE=C sort --stable --ignore-case | xargs sha256sum > "/tmp/hashes-$1.sha"
+  check_sha256 "$1" "/tmp/hashes-$1.sha"
 }
 
 # Strip binaries to reduce file size, we don't need this information anyway
@@ -229,9 +231,9 @@ store_apt_cache()
 # OpenSSL
 
 OPENSSL_PREFIX_DIR="$DEP_DIR/libopenssl"
-OPENSSL_VERSION=1.1.1f
+OPENSSL_VERSION=1.1.1g
 # hash from https://www.openssl.org/source/
-OPENSSL_HASH="186c6bfe6ecfba7a5b48c47f8a1673d0f3b0e5ba2e25602dd23b629975da3f35"
+OPENSSL_HASH="ddb04774f1e32f0c49751e21b67216ac87852ceb056b75209af2443400636d46"
 OPENSSL_FILENAME="openssl-$OPENSSL_VERSION.tar.gz"
 if [ ! -f "$OPENSSL_PREFIX_DIR/done" ]
 then
@@ -295,7 +297,7 @@ then
   # which happens when building Qt
   CONFIGURE_EXTRA=""
   set +u
-  if [[ "$TRAVIS_CI_STAGE" == "stage1" ]]
+  if [[ -n "$TRAVIS_CI_STAGE" ]]
   then
     CONFIGURE_EXTRA="-silent"
   fi
@@ -389,8 +391,8 @@ set -u
 # SQLCipher
 
 SQLCIPHER_PREFIX_DIR="$DEP_DIR/libsqlcipher"
-SQLCIPHER_VERSION=v4.3.0
-SQLCIPHER_HASH="fccb37e440ada898902b294d02cde7af9e8706b185d77ed9f6f4d5b18b4c305f"
+SQLCIPHER_VERSION=v4.4.0
+SQLCIPHER_HASH="0924b2ae1079717954498bda78a30de20ce2a6083076b16214a711567821d148"
 SQLCIPHER_FILENAME="$SQLCIPHER_VERSION.tar.gz"
 if [ ! -f "$SQLCIPHER_PREFIX_DIR/done" ]
 then
@@ -403,36 +405,17 @@ then
   rm $SQLCIPHER_FILENAME
   cd sqlcipher*
 
-  sed -i s/'LIBS="-lcrypto  $LIBS"'/'LIBS="-lcrypto -lgdi32 -lws2_32  $LIBS"'/g configure
-  sed -i s/'LIBS="-lcrypto $LIBS"'/'LIBS="-lcrypto -lgdi32 -lws2_32 $LIBS"'/g configure
   sed -i s/'if test "$TARGET_EXEEXT" = ".exe"'/'if test ".exe" = ".exe"'/g configure
   sed -i 's|exec $PWD/mksourceid manifest|exec $PWD/mksourceid.exe manifest|g' tool/mksqlite3h.tcl
 
-# Do not remove trailing whitespace and dont replace tabs with spaces in the patch below,
-#  otherwise the patch will fail to apply
-> Makefile.in-patch cat << "EOF"
---- Makefile.in	2017-07-24 04:33:46.944080013 +0000
-+++ Makefile.in-patch	2017-07-24 04:50:47.340596990 +0000
-@@ -1074,7 +1074,7 @@
-    $(TOP)/ext/fts5/fts5_varint.c \
-    $(TOP)/ext/fts5/fts5_vocab.c  \
-
--fts5parse.c:	$(TOP)/ext/fts5/fts5parse.y lemon
-+fts5parse.c:	$(TOP)/ext/fts5/fts5parse.y lemon$(BEXE)
- 	cp $(TOP)/ext/fts5/fts5parse.y .
- 	rm -f fts5parse.h
- 	./lemon$(BEXE) $(OPTS) fts5parse.y
-
-EOF
-
-  patch -l < Makefile.in-patch
-
   ./configure --host="$ARCH-w64-mingw32" \
               --prefix="$SQLCIPHER_PREFIX_DIR" \
-              --disable-shared \
+              --enable-shared \
+              --disable-static \
               --enable-tempstore=yes \
               CFLAGS="-O2 -g0 -DSQLITE_HAS_CODEC -I$OPENSSL_PREFIX_DIR/include/" \
-              LDFLAGS="$OPENSSL_PREFIX_DIR/lib/libcrypto.a -lcrypto -lgdi32 -L$OPENSSL_PREFIX_DIR/lib/"
+              LDFLAGS="-lcrypto -lgdi32 -L$OPENSSL_PREFIX_DIR/lib/" \
+              LIBS="-lgdi32 -lws2_32"
 
   sed -i s/"TEXE = $"/"TEXE = .exe"/ Makefile
 
@@ -450,8 +433,8 @@ fi
 # FFmpeg
 
 FFMPEG_PREFIX_DIR="$DEP_DIR/libffmpeg"
-FFMPEG_VERSION=4.2.2
-FFMPEG_HASH="cb754255ab0ee2ea5f66f8850e1bd6ad5cac1cd855d0a2f4990fb8c668b0d29c"
+FFMPEG_VERSION=4.2.3
+FFMPEG_HASH="9df6c90aed1337634c1fb026fb01c154c29c82a64ea71291ff2da9aacb9aad31"
 FFMPEG_FILENAME="ffmpeg-$FFMPEG_VERSION.tar.xz"
 if [ ! -f "$FFMPEG_PREFIX_DIR/done" ]
 then
@@ -474,15 +457,14 @@ then
 
   ./configure $CONFIGURE_OPTIONS \
               --enable-gpl \
+              --enable-shared \
+              --disable-static \
               --prefix="$FFMPEG_PREFIX_DIR" \
               --target-os="mingw32" \
               --cross-prefix="$ARCH-w64-mingw32-" \
               --pkg-config="pkg-config" \
-              --extra-cflags="-static -O2 -g0" \
-              --extra-ldflags="-lm -static" \
-              --pkg-config-flags="--static" \
+              --extra-cflags="-O2 -g0" \
               --disable-debug \
-              --disable-shared \
               --disable-programs \
               --disable-protocols \
               --disable-doc \
@@ -536,6 +518,8 @@ fi
 
 
 # Openal-soft (irungentoo's fork)
+# We can stop using the fork once OpenAL-Soft gets loopback capture implemented:
+# https://github.com/kcat/openal-soft/pull/421
 
 OPENAL_PREFIX_DIR="$DEP_DIR/libopenal"
 OPENAL_VERSION=b80570bed017de60b67c6452264c634085c3b148
@@ -630,8 +614,8 @@ then
 
   CFLAGS="-O2 -g0" ./configure --host="$ARCH-w64-mingw32" \
                                --prefix="$QRENCODE_PREFIX_DIR" \
-                               --disable-shared \
-                               --enable-static \
+                               --enable-shared \
+                               --disable-static \
                                --disable-sdltest \
                                --without-tools \
                                --without-debug
@@ -649,15 +633,15 @@ fi
 # Exif
 
 EXIF_PREFIX_DIR="$DEP_DIR/libexif"
-EXIF_VERSION=0.6.21
-EXIF_HASH="16cdaeb62eb3e6dfab2435f7d7bccd2f37438d21c5218ec4e58efa9157d4d41a"
-EXIF_FILENAME=libexif-$EXIF_VERSION.tar.bz2
+EXIF_VERSION=0.6.22
+EXIF_HASH="5048f1c8fc509cc636c2f97f4b40c293338b6041a5652082d5ee2cf54b530c56"
+EXIF_FILENAME="libexif-$EXIF_VERSION.tar.xz"
 if [ ! -f "$EXIF_PREFIX_DIR/done" ]
 then
   rm -rf "$EXIF_PREFIX_DIR"
   mkdir -p "$EXIF_PREFIX_DIR"
 
-  wget $WGET_OPTIONS https://sourceforge.net/projects/libexif/files/libexif/$EXIF_VERSION/$EXIF_FILENAME
+  wget $WGET_OPTIONS "https://github.com/libexif/libexif/releases/download/libexif-${EXIF_VERSION//./_}-release/${EXIF_FILENAME}"
   check_sha256 "$EXIF_HASH" "$EXIF_FILENAME"
   bsdtar --no-same-owner --no-same-permissions -xf $EXIF_FILENAME
   rm $EXIF_FILENAME
@@ -665,8 +649,8 @@ then
 
   CFLAGS="-O2 -g0" ./configure --host="$ARCH-w64-mingw32" \
                                --prefix="$EXIF_PREFIX_DIR" \
-                               --disable-shared \
-                               --enable-static \
+                               --enable-shared \
+                               --disable-static \
                                --disable-docs \
                                --disable-nls
   make
@@ -700,8 +684,8 @@ then
 
   CFLAGS="-O2 -g0" ./configure --host="$ARCH-w64-mingw32" \
                                --prefix="$OPUS_PREFIX_DIR" \
-                               --disable-shared \
-                               --enable-static \
+                               --enable-shared \
+                               --disable-static \
                                --disable-extra-programs \
                                --disable-doc
   make
@@ -734,9 +718,8 @@ then
 
   ./configure --host="$ARCH-w64-mingw32" \
               --prefix="$SODIUM_PREFIX_DIR" \
-              --disable-shared \
-              --enable-static \
-              --with-pic
+              --enable-shared \
+              --disable-static
   make
   make install
   echo -n $SODIUM_VERSION > $SODIUM_PREFIX_DIR/done
@@ -778,17 +761,153 @@ then
     VPX_CFLAGS=""
   fi
 
+  cd ..
+
+# Fix VPX not supporting creation of dll
+# Modified version of https://aur.archlinux.org/cgit/aur.git/tree/configure.patch?h=mingw-w64-libvpx&id=6d658aa0f4d8409fcbd0f20be2c0adcf1e81a297
+> configure.patch cat << "EOF"
+diff -ruN libvpx/build/make/configure.sh patched/build/make/configure.sh
+--- libvpx/build/make/configure.sh	2019-02-13 16:56:48.972857636 +0100
++++ patched/build/make/configure.sh	2019-02-13 16:50:37.995967583 +0100
+@@ -1426,11 +1426,13 @@
+         win32)
+           add_asflags -f win32
+           enabled debug && add_asflags -g cv8
++          add_ldflags "-Wl,-no-undefined"
+           EXE_SFX=.exe
+           ;;
+         win64)
+           add_asflags -f win64
+           enabled debug && add_asflags -g cv8
++          add_ldflags "-Wl,-no-undefined"
+           EXE_SFX=.exe
+           ;;
+         linux*|solaris*|android*)
+diff -ruN libvpx/build/make/Makefile patched/build/make/Makefile
+--- libvpx/build/make/Makefile	2019-02-13 16:56:48.972857636 +0100
++++ patched/build/make/Makefile	2019-02-13 16:50:37.995967583 +0100
+@@ -304,6 +304,7 @@
+ 	$(if $(quiet),@echo "    [LD] $$@")
+ 	$(qexec)$$(LD) -shared $$(LDFLAGS) \
+             -Wl,--no-undefined -Wl,-soname,$$(SONAME) \
++            -Wl,-out-implib,libvpx.dll.a \
+             -Wl,--version-script,$$(EXPORTS_FILE) -o $$@ \
+             $$(filter %.o,$$^) $$(extralibs)
+ endef
+@@ -388,7 +389,7 @@
+ .libs: $(LIBS)
+ 	@touch $@
+ $(foreach lib,$(filter %_g.a,$(LIBS)),$(eval $(call archive_template,$(lib))))
+-$(foreach lib,$(filter %so.$(SO_VERSION_MAJOR).$(SO_VERSION_MINOR).$(SO_VERSION_PATCH),$(LIBS)),$(eval $(call so_template,$(lib))))
++$(foreach lib,$(filter %dll,$(LIBS)),$(eval $(call so_template,$(lib))))
+ $(foreach lib,$(filter %$(SO_VERSION_MAJOR).dylib,$(LIBS)),$(eval $(call dl_template,$(lib))))
+ $(foreach lib,$(filter %$(SO_VERSION_MAJOR).dll,$(LIBS)),$(eval $(call dll_template,$(lib))))
+ 
+diff -ruN libvpx/configure patched/configure
+--- libvpx/configure	2019-02-13 16:56:49.162860897 +0100
++++ patched/configure	2019-02-13 16:53:03.328719607 +0100
+@@ -513,23 +513,23 @@
+ }
+ 
+ process_detect() {
+-    if enabled shared; then
++    #if enabled shared; then
+         # Can only build shared libs on a subset of platforms. Doing this check
+         # here rather than at option parse time because the target auto-detect
+         # magic happens after the command line has been parsed.
+-        case "${tgt_os}" in
+-        linux|os2|solaris|darwin*|iphonesimulator*)
++    #    case "${tgt_os}" in
++    #    linux|os2|solaris|darwin*|iphonesimulator*)
+             # Supported platforms
+-            ;;
+-        *)
+-            if enabled gnu; then
+-                echo "--enable-shared is only supported on ELF; assuming this is OK"
+-            else
+-                die "--enable-shared only supported on ELF, OS/2, and Darwin for now"
+-            fi
+-            ;;
+-        esac
+-    fi
++    #        ;;
++    #    *)
++    #        if enabled gnu; then
++    #            echo "--enable-shared is only supported on ELF; assuming this is OK"
++    #        else
++    #            die "--enable-shared only supported on ELF, OS/2, and Darwin for now"
++    #        fi
++    #        ;;
++    #    esac
++    #fi
+     if [ -z "$CC" ] || enabled external_build; then
+         echo "Bypassing toolchain for environment detection."
+         enable_feature external_build
+diff -ruN libvpx/examples.mk patched/examples.mk
+--- libvpx/examples.mk	2019-02-13 16:56:49.162860897 +0100
++++ patched/examples.mk	2019-02-13 16:50:37.995967583 +0100
+@@ -315,7 +315,7 @@
+ ifneq ($(filter os2%,$(TGT_OS)),)
+ SHARED_LIB_SUF=_dll.a
+ else
+-SHARED_LIB_SUF=.so
++SHARED_LIB_SUF=.dll.a
+ endif
+ endif
+ CODEC_LIB_SUF=$(if $(CONFIG_SHARED),$(SHARED_LIB_SUF),.a)
+diff -ruN libvpx/libs.mk patched/libs.mk
+--- libvpx/libs.mk	2019-02-13 16:56:48.972857636 +0100
++++ patched/libs.mk	2019-02-13 16:50:37.995967583 +0100
+@@ -256,12 +256,12 @@
+ LIBVPX_SO_SYMLINKS      :=
+ LIBVPX_SO_IMPLIB        := libvpx_dll.a
+ else
+-LIBVPX_SO               := libvpx.so.$(SO_VERSION_MAJOR).$(SO_VERSION_MINOR).$(SO_VERSION_PATCH)
+-SHARED_LIB_SUF          := .so
++LIBVPX_SO               := libvpx.dll
++SHARED_LIB_SUF          := .dll
+ EXPORT_FILE             := libvpx.ver
+-LIBVPX_SO_SYMLINKS      := $(addprefix $(LIBSUBDIR)/, \
+-                             libvpx.so libvpx.so.$(SO_VERSION_MAJOR) \
+-                             libvpx.so.$(SO_VERSION_MAJOR).$(SO_VERSION_MINOR))
++LIBVPX_SO_SYMLINKS      :=
++
++
+ endif
+ endif
+ endif
+@@ -271,7 +271,7 @@
+                            $(if $(LIBVPX_SO_IMPLIB), $(BUILD_PFX)$(LIBVPX_SO_IMPLIB))
+ $(BUILD_PFX)$(LIBVPX_SO): $(LIBVPX_OBJS) $(EXPORT_FILE)
+ $(BUILD_PFX)$(LIBVPX_SO): extralibs += -lm
+-$(BUILD_PFX)$(LIBVPX_SO): SONAME = libvpx.so.$(SO_VERSION_MAJOR)
++$(BUILD_PFX)$(LIBVPX_SO): SONAME = libvpx.dll
+ $(BUILD_PFX)$(LIBVPX_SO): EXPORTS_FILE = $(EXPORT_FILE)
+ 
+ libvpx.def: $(call enabled,CODEC_EXPORTS)
+EOF
+
+  cd -
+  patch -Np1 < ../configure.patch
+  rm ../configure.patch
+
   CFLAGS="$VPX_CFLAGS" \
   CROSS="$ARCH-w64-mingw32-" ./configure --target="$VPX_TARGET" \
                                          --prefix="$VPX_PREFIX_DIR" \
-                                         --disable-shared \
-                                         --enable-static \
+                                         --enable-shared \
+                                         --disable-static \
+                                         --enable-runtime-cpu-detect \
                                          --disable-examples \
                                          --disable-tools \
                                          --disable-docs \
                                          --disable-unit-tests
   make
   make install
+
+  mkdir -p "$VPX_PREFIX_DIR/bin"
+  mv "$VPX_PREFIX_DIR/lib/"*.dll "$VPX_PREFIX_DIR/bin/"
+  mv ./libvpx*.dll.a "$VPX_PREFIX_DIR/lib/"
+
   echo -n $VPX_VERSION > $VPX_PREFIX_DIR/done
 
   cd ..
@@ -834,8 +953,8 @@ then
   cmake -DCMAKE_INSTALL_PREFIX=$TOXCORE_PREFIX_DIR \
         -DBOOTSTRAP_DAEMON=OFF \
         -DCMAKE_BUILD_TYPE=Release \
-        -DENABLE_STATIC=ON \
-        -DENABLE_SHARED=OFF \
+        -DENABLE_STATIC=OFF \
+        -DENABLE_SHARED=ON \
         -DCMAKE_TOOLCHAIN_FILE=toolchain.cmake \
         ..
 
@@ -855,32 +974,108 @@ else
 fi
 
 
-# mingw-w64-debug-scripts
-
-MINGW_W64_DEBUG_SCRIPTS_PREFIX_DIR="$DEP_DIR/mingw-w64-debug-scripts"
-MINGW_W64_DEBUG_SCRIPTS_VERSION=7341e1ffdea352e5557f3fcae51569f13e1ef270
-MINGW_W64_DEBUG_SCRIPTS_HASH="a92883ddfe83780818347fda4ac07bce61df9226818df2f52fe4398fe733e204"
-if [ ! -f "$MINGW_W64_DEBUG_SCRIPTS_PREFIX_DIR/done" ]
+set +u
+if [[ -n "$TRAVIS_CI_STAGE" ]] || [[ "$BUILD_TYPE" == "debug" ]]
 then
-  rm -rf "$MINGW_W64_DEBUG_SCRIPTS_PREFIX_DIR"
-  mkdir -p "$MINGW_W64_DEBUG_SCRIPTS_PREFIX_DIR"
+set -u
 
-  # Get dbg executable and the debug scripts
-  git clone https://github.com/nurupo/mingw-w64-debug-scripts mingw-w64-debug-scripts
-  cd mingw-w64-debug-scripts
-  git checkout $MINGW_W64_DEBUG_SCRIPTS_VERSION
-  check_sha256_git "$MINGW_W64_DEBUG_SCRIPTS_HASH"
+  # mingw-w64-debug-scripts
 
-  make $ARCH EXE_NAME=qtox.exe
-  mkdir -p "$MINGW_W64_DEBUG_SCRIPTS_PREFIX_DIR/bin"
-  mv output/$ARCH/* "$MINGW_W64_DEBUG_SCRIPTS_PREFIX_DIR/bin/"
-  echo -n $MINGW_W64_DEBUG_SCRIPTS_VERSION > $MINGW_W64_DEBUG_SCRIPTS_PREFIX_DIR/done
+  MINGW_W64_DEBUG_SCRIPTS_PREFIX_DIR="$DEP_DIR/mingw-w64-debug-scripts"
+  MINGW_W64_DEBUG_SCRIPTS_VERSION="c6ae689137844d1a6fd9c1b9a071d3f82a44c593"
+  MINGW_W64_DEBUG_SCRIPTS_HASH="1343bee72f3d9fad01ac7101d6e9cffee1e76db82f2ef9a69f7c7e988ec4b301"
+  if [ ! -f "$MINGW_W64_DEBUG_SCRIPTS_PREFIX_DIR/done" ]
+  then
+    rm -rf "$MINGW_W64_DEBUG_SCRIPTS_PREFIX_DIR"
+    mkdir -p "$MINGW_W64_DEBUG_SCRIPTS_PREFIX_DIR"
 
-  cd ..
-  rm -rf ./mingw-w64-debug-scripts
-else
-  echo "Using cached build of mingw-w64-debug-scripts `cat $MINGW_W64_DEBUG_SCRIPTS_PREFIX_DIR/done`"
+    git clone https://github.com/nurupo/mingw-w64-debug-scripts mingw-w64-debug-scripts
+    cd mingw-w64-debug-scripts
+    git checkout $MINGW_W64_DEBUG_SCRIPTS_VERSION
+    check_sha256_git "$MINGW_W64_DEBUG_SCRIPTS_HASH"
+
+    sed -i "s|your-app-name.exe|qtox.exe|g" debug-*.bat
+    mkdir -p "$MINGW_W64_DEBUG_SCRIPTS_PREFIX_DIR/bin"
+    cp -a debug-*.bat "$MINGW_W64_DEBUG_SCRIPTS_PREFIX_DIR/bin/"
+    echo -n $MINGW_W64_DEBUG_SCRIPTS_VERSION > $MINGW_W64_DEBUG_SCRIPTS_PREFIX_DIR/done
+
+    cd ..
+    rm -rf ./mingw-w64-debug-scripts
+  else
+    echo "Using cached build of mingw-w64-debug-scripts `cat $MINGW_W64_DEBUG_SCRIPTS_PREFIX_DIR/done`"
+  fi
+
+
+  # Expat
+
+  EXPAT_PREFIX_DIR="$DEP_DIR/libexpat"
+  EXPAT_VERSION="2.2.9"
+  EXPAT_HASH="1ea6965b15c2106b6bbe883397271c80dfa0331cdf821b2c319591b55eadc0a4"
+  EXPAT_FILENAME="expat-$EXPAT_VERSION.tar.xz"
+  if [ ! -f "$EXPAT_PREFIX_DIR/done" ]
+  then
+    rm -rf "$EXPAT_PREFIX_DIR"
+    mkdir -p "$EXPAT_PREFIX_DIR"
+
+    wget $WGET_OPTIONS "https://github.com/libexpat/libexpat/releases/download/R_${EXPAT_VERSION//./_}/$EXPAT_FILENAME"
+    check_sha256 "$EXPAT_HASH" "$EXPAT_FILENAME"
+    bsdtar --no-same-owner --no-same-permissions -xf $EXPAT_FILENAME
+    rm $EXPAT_FILENAME
+    cd expat*
+
+    CFLAGS="-O2 -g0" ./configure --host="$ARCH-w64-mingw32" \
+                                 --prefix="$EXPAT_PREFIX_DIR" \
+                                 --enable-static \
+                                 --disable-shared
+    make
+    make install
+    echo -n $EXPAT_VERSION > $EXPAT_PREFIX_DIR/done
+
+    cd ..
+    rm -rf ./expat*
+  else
+    echo "Using cached build of Expat `cat $EXPAT_PREFIX_DIR/done`"
+  fi
+
+
+  # GDB
+
+  GDB_PREFIX_DIR="$DEP_DIR/gdb"
+  GDB_VERSION="9.2"
+  GDB_HASH="360cd7ae79b776988e89d8f9a01c985d0b1fa21c767a4295e5f88cb49175c555"
+  GDB_FILENAME="gdb-$GDB_VERSION.tar.xz"
+  if [ ! -f "$GDB_PREFIX_DIR/done" ]
+  then
+    rm -rf "$GDB_PREFIX_DIR"
+    mkdir -p "$GDB_PREFIX_DIR"
+
+    wget $WGET_OPTIONS "http://ftp.gnu.org/gnu/gdb/$GDB_FILENAME"
+    check_sha256 "$GDB_HASH" "$GDB_FILENAME"
+    bsdtar --no-same-owner --no-same-permissions -xf $GDB_FILENAME
+    rm $GDB_FILENAME
+    cd gdb*
+
+    mkdir build
+    cd build
+    CFLAGS="-O2 -g0" ../configure --host="$ARCH-w64-mingw32" \
+                                  --prefix="$GDB_PREFIX_DIR" \
+                                  --enable-static \
+                                  --disable-shared \
+                                  --with-libexpat-prefix="$EXPAT_PREFIX_DIR"
+    make
+    make install
+    cd ..
+    echo -n $GDB_VERSION > $GDB_PREFIX_DIR/done
+
+    cd ..
+    rm -rf ./gdb*
+  else
+    echo "Using cached build of GDB `cat $GDB_PREFIX_DIR/done`"
+  fi
+
+set +u
 fi
+set -u
 
 
 # NSIS ShellExecAsUser plugin
@@ -907,6 +1102,34 @@ else
 fi
 # Install ShellExecAsUser plugin
 cp "$NSISSHELLEXECASUSER_PREFIX_DIR/bin/ShellExecAsUser.dll" /usr/share/nsis/Plugins/x86-ansi/
+
+
+# mingw-ldd
+
+MINGW_LDD_PREFIX_DIR="$DEP_DIR/mingw-ldd"
+MINGW_LDD_VERSION=v0.2.0
+MINGW_LDD_HASH="d4cf712da18fa822b4934144d44cd254e18c9c0ca987363503bb3b6aeb3134db"
+MINGW_LDD_FILENAME="$MINGW_LDD_VERSION.tar.gz"
+if [ ! -f "$MINGW_LDD_PREFIX_DIR/done" ]
+then
+  rm -rf "$MINGW_LDD_PREFIX_DIR"
+  mkdir -p "$MINGW_LDD_PREFIX_DIR"
+
+  wget $WGET_OPTIONS "https://github.com/nurupo/mingw-ldd/archive/$MINGW_LDD_FILENAME" -O "$MINGW_LDD_FILENAME"
+  check_sha256 "$MINGW_LDD_HASH" "$MINGW_LDD_FILENAME"
+  bsdtar --no-same-owner --no-same-permissions -xf "$MINGW_LDD_FILENAME"
+  rm "$MINGW_LDD_FILENAME"
+  cd mingw-ldd*
+
+  mkdir "$MINGW_LDD_PREFIX_DIR/bin"
+  cp -a "mingw_ldd/mingw_ldd.py" "$MINGW_LDD_PREFIX_DIR/bin/mingw-ldd.py"
+  echo -n $MINGW_LDD_VERSION > $MINGW_LDD_PREFIX_DIR/done
+
+  cd ..
+  rm -rf ./mingw-ldd*
+else
+  echo "Using cached build of mingw-ldd `cat $MINGW_LDD_PREFIX_DIR/done`"
+fi
 
 
 # Stop here if running the second stage on Travis CI
@@ -963,8 +1186,9 @@ echo "
     SET(CMAKE_FIND_ROOT_PATH /usr/$ARCH-w64-mingw32 $CMAKE_FIND_ROOT_PATH)
 " > toolchain.cmake
 
+# Run tests using Wine
 set +u
-if [[ "$TRAVIS_CI_STAGE" == "stage3" ]]
+if [[ -n "$TRAVIS_CI_STAGE" ]]
 then
   echo "SET(TEST_CROSSCOMPILING_EMULATOR /usr/bin/wine)" >> toolchain.cmake
 fi
@@ -1003,26 +1227,67 @@ cp -r $QT_PREFIX_DIR/plugins/imageformats \
       $QT_PREFIX_DIR/plugins/platforms \
       $QT_PREFIX_DIR/plugins/iconengines \
       $QTOX_PREFIX_DIR
-cp $OPENAL_PREFIX_DIR/bin/OpenAL32.dll $QTOX_PREFIX_DIR
-cp $OPENSSL_PREFIX_DIR/bin/libssl-*.dll \
-   $OPENSSL_PREFIX_DIR/bin/libcrypto-*.dll \
-   $QTOX_PREFIX_DIR
+cp {$OPENSSL_PREFIX_DIR,$SQLCIPHER_PREFIX_DIR,$FFMPEG_PREFIX_DIR,$OPENAL_PREFIX_DIR,$QRENCODE_PREFIX_DIR,$EXIF_PREFIX_DIR,$OPUS_PREFIX_DIR,$SODIUM_PREFIX_DIR,$VPX_PREFIX_DIR,$TOXCORE_PREFIX_DIR}/bin/*.dll $QTOX_PREFIX_DIR
+
 cp /usr/lib/gcc/$ARCH-w64-mingw32/*-posix/libgcc_s_*.dll $QTOX_PREFIX_DIR
 cp /usr/lib/gcc/$ARCH-w64-mingw32/*-posix/libstdc++-6.dll $QTOX_PREFIX_DIR
 cp /usr/$ARCH-w64-mingw32/lib/libwinpthread-1.dll $QTOX_PREFIX_DIR
 
-set +u
-if [[ "$TRAVIS_CI_STAGE" == "stage3" ]]
+# Setup wine
+if [[ "$ARCH" == "i686" ]]
 then
-  # Setup wine
-  if [[ "$ARCH" == "i686" ]]
+  export WINEARCH=win32
+elif [[ "$ARCH" == "x86_64" ]]
+then
+  export WINEARCH=win64
+fi
+winecfg
+
+# dll checks
+python3 $MINGW_LDD_PREFIX_DIR/bin/mingw-ldd.py $QTOX_PREFIX_DIR/qtox.exe --dll-lookup-dirs $QTOX_PREFIX_DIR ~/.wine/drive_c/windows/system32 > /tmp/$ARCH-qtox-ldd
+find "$QTOX_PREFIX_DIR" -name '*.dll' > /tmp/$ARCH-qtox-dll-find
+# dlls loded at run time that don't showup as a link time dependency
+echo "$QTOX_PREFIX_DIR/libssl-1_1.dll
+$QTOX_PREFIX_DIR/libssl-1_1-x64.dll
+$QTOX_PREFIX_DIR/iconengines/qsvgicon.dll
+$QTOX_PREFIX_DIR/imageformats/qgif.dll
+$QTOX_PREFIX_DIR/imageformats/qico.dll
+$QTOX_PREFIX_DIR/imageformats/qjpeg.dll
+$QTOX_PREFIX_DIR/imageformats/qsvg.dll
+$QTOX_PREFIX_DIR/platforms/qdirect2d.dll
+$QTOX_PREFIX_DIR/platforms/qminimal.dll
+$QTOX_PREFIX_DIR/platforms/qoffscreen.dll
+$QTOX_PREFIX_DIR/platforms/qwindows.dll" > /tmp/$ARCH-qtox-dll-whitelist
+
+
+# Check that all dlls are in place
+if grep 'not found' /tmp/$ARCH-qtox-ldd
+then
+  cat /tmp/$ARCH-qtox-ldd
+  echo "Error: Missing some dlls."
+  exit 1
+fi
+
+# Check that no extra dlls get bundled
+while IFS= read -r line
+do
+  # skip over whitelisted dlls
+  if grep "$line" /tmp/$ARCH-qtox-dll-whitelist
   then
-    export WINEARCH=win32
-  elif [[ "$ARCH" == "x86_64" ]]
-  then
-    export WINEARCH=win64
+    continue
   fi
-  winecfg
+  if ! grep "$line" /tmp/$ARCH-qtox-ldd
+  then
+    echo "Error: extra dll included: $line. If this is a mistake and the dll is actually needed (e.g. it's loaded at run-time), please add it to the whitelist."
+    exit 1
+  fi
+done < /tmp/$ARCH-qtox-dll-find
+
+
+# Run tests (only on Travis)
+set +u
+if [[ -n "$TRAVIS_CI_STAGE" ]]
+then
   # Add libgcc_s_*.dll, libwinpthread-1.dll, QtTest.dll, etc. into PATH env var of wine
   export WINEPATH=`cd $QTOX_PREFIX_DIR ; winepath -w $(pwd)`\;`winepath -w $QT_PREFIX_DIR/bin/`
   export CTEST_OUTPUT_ON_FAILURE=1
@@ -1039,8 +1304,18 @@ then
   mkdir -p "$QTOX_PREFIX_DIR/$PWD/src"
   cp -r "$PWD/src" "$QTOX_PREFIX_DIR/$PWD"
 
-  # Get dbg executable and the debug scripts
+  # Get debug scripts
   cp -r $MINGW_W64_DEBUG_SCRIPTS_PREFIX_DIR/bin/* "$QTOX_PREFIX_DIR/"
+  cp -r $GDB_PREFIX_DIR/bin/gdb.exe "$QTOX_PREFIX_DIR/"
+
+  # Check that all dlls are in place
+  python3 $MINGW_LDD_PREFIX_DIR/bin/mingw-ldd.py $QTOX_PREFIX_DIR/gdb.exe --dll-lookup-dirs $QTOX_PREFIX_DIR ~/.wine/drive_c/windows/system32 > /tmp/$ARCH-gdb-ldd
+  if grep 'not found' /tmp/$ARCH-gdb-ldd
+  then
+    cat /tmp/$ARCH-gdb-ldd
+    echo "Error: Missing some dlls."
+    exit 1
+  fi
 fi
 
 # Strip

@@ -17,8 +17,7 @@
     along with qTox.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef GROUP_H
-#define GROUP_H
+#pragma once
 
 #include "contact.h"
 
@@ -72,9 +71,6 @@ signals:
     void peerNameChanged(const ToxPk& peer, const QString& oldName, const QString& newName);
 
 private:
-    void stopAudioOfDepartedPeers(const ToxPk& peerPk);
-
-private:
     ICoreGroupQuery& groupQuery;
     ICoreIdHandler& idHandler;
     QString selfName;
@@ -86,5 +82,3 @@ private:
     const GroupId groupId;
     bool avGroupchat;
 };
-
-#endif // GROUP_H

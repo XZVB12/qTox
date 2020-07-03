@@ -17,7 +17,7 @@
     along with qTox.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "src/audio/audio.h"
+#include "audio/audio.h"
 #include "src/ipc.h"
 #include "src/net/toxuri.h"
 #include "src/nexus.h"
@@ -42,10 +42,6 @@
 #include <ctime>
 #include <sodium.h>
 #include <stdio.h>
-
-#if defined(Q_OS_OSX)
-#include "platform/install_osx.h"
-#endif
 
 #if defined(Q_OS_UNIX)
 #include "platform/posixsignalnotifier.h"
@@ -97,6 +93,16 @@ void logMessageHandler(QtMsgType type, const QMessageLogContext& ctxt, const QSt
     if (ctxt.function == QString("virtual bool QFSFileEngine::open(QIODevice::OpenMode)")
         && msg == QString("QFSFileEngine::open: No file name specified"))
         return;
+
+    QRegExp snoreFilter{QStringLiteral("Snore::Notification.*was already closed")};
+    if (type == QtWarningMsg
+        && msg.contains(snoreFilter))
+    {
+        // snorenotify logs this when we call requestCloseNotification correctly. The behaviour still works, so we'll
+        // just mask the warning for now. The issue has been reported upstream:
+        // https://github.com/qTox/qTox/pull/6073#pullrequestreview-420748519
+        return;
+    }
 
     QString file = ctxt.file;
     // We're not using QT_MESSAGELOG_FILE here, because that can be 0, NULL, or
@@ -165,6 +171,22 @@ void logMessageHandler(QtMsgType type, const QMessageLogContext& ctxt, const QSt
 #endif
 }
 
+static std::unique_ptr<ToxURIDialog> uriDialog;
+
+static bool toxURIEventHandler(const QByteArray& eventData)
+{
+    if (!eventData.startsWith("tox:")) {
+        return false;
+    }
+
+    if (!uriDialog) {
+        return false;
+    }
+
+    uriDialog->handleToxURI(eventData);
+    return true;
+}
+
 int main(int argc, char* argv[])
 {
 #if (QT_VERSION >= QT_VERSION_CHECK(5, 6, 0))
@@ -201,13 +223,6 @@ int main(int argc, char* argv[])
     if (QFontDatabase::addApplicationFont("://font/DejaVuSans.ttf") == -1) {
         qWarning() << "Couldn't load font";
     }
-
-
-#if defined(Q_OS_OSX)
-    // TODO: Add setting to enable this feature.
-    // osx::moveToAppFolder();
-    osx::migrateProfiles();
-#endif
 
 #if (QT_VERSION < QT_VERSION_CHECK(5, 15, 0))
     qsrand(time(nullptr));
@@ -266,7 +281,7 @@ int main(int argc, char* argv[])
     }
 
 #ifdef LOG_TO_FILE
-    QString logFileDir = settings.getAppCacheDirPath();
+    QString logFileDir = settings.getPaths().getAppCacheDirPath();
     QDir(logFileDir).mkpath(".");
 
     QString logfile = logFileDir + "qtox.log";
@@ -398,7 +413,10 @@ int main(int argc, char* argv[])
         if (returnval == QDialog::Rejected) {
             return -1;
         }
+        profile = nexus.getProfile();
     }
+
+    uriDialog = std::unique_ptr<ToxURIDialog>(new ToxURIDialog(nullptr, profile->getCore()));
 
     if (ipc.isAttached()) {
         // Start to accept Inter-process communication
@@ -408,10 +426,11 @@ int main(int argc, char* argv[])
     }
 
     // Event was not handled by already running instance therefore we handle it ourselves
-    if (eventType == "uri")
-        handleToxURI(firstParam.toUtf8());
-    else if (eventType == "save")
+    if (eventType == "uri") {
+        uriDialog->handleToxURI(firstParam.toUtf8());
+    } else if (eventType == "save") {
         handleToxSave(firstParam.toUtf8());
+    }
 
     QObject::connect(a.get(), &QApplication::aboutToQuit, cleanup);
 

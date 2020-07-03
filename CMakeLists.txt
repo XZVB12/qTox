@@ -257,18 +257,6 @@ execute_process(COMMAND ${CMAKE_COMMAND} -E copy_if_different
   ${CMAKE_CURRENT_BINARY_DIR}/translations.qrc)
 
 set(${PROJECT_NAME}_SOURCES
-  src/audio/audio.cpp
-  src/audio/audio.h
-  src/audio/backend/alsink.cpp
-  src/audio/backend/alsink.h
-  src/audio/backend/alsource.cpp
-  src/audio/backend/alsource.h
-  src/audio/backend/openal.cpp
-  src/audio/backend/openal.h
-  src/audio/iaudiosettings.h
-  src/audio/iaudiocontrol.h
-  src/audio/iaudiosink.h
-  src/audio/iaudiosource.h
   src/chatlog/chatlinecontent.cpp
   src/chatlog/chatlinecontent.h
   src/chatlog/chatlinecontentproxy.cpp
@@ -351,6 +339,8 @@ set(${PROJECT_NAME}_SOURCES
   src/model/contact.h
   src/model/chatlogitem.cpp
   src/model/chatlogitem.h
+  src/model/exiftransform.h
+  src/model/exiftransform.cpp
   src/model/friend.cpp
   src/model/friend.h
   src/model/message.h
@@ -368,7 +358,6 @@ set(${PROJECT_NAME}_SOURCES
   src/model/group.h
   src/model/status.cpp
   src/model/status.h
-  src/model/interface.h
   src/model/profile/iprofileinfo.h
   src/model/profile/profileinfo.cpp
   src/model/profile/profileinfo.h
@@ -379,6 +368,9 @@ set(${PROJECT_NAME}_SOURCES
   src/model/chathistory.h
   src/model/chathistory.cpp
   src/model/toxclientstandards.h
+  src/model/ibootstraplistgenerator.h
+  src/model/notificationgenerator.h
+  src/model/notificationgenerator.cpp
   src/net/bootstrapnodeupdater.cpp
   src/net/bootstrapnodeupdater.h
   src/net/avatarbroadcaster.cpp
@@ -573,11 +565,6 @@ elseif (${CMAKE_SYSTEM_NAME} MATCHES "Linux" OR ${CMAKE_SYSTEM_NAME} MATCHES "Fr
     src/platform/camera/v4l2.cpp
     src/platform/camera/v4l2.h
   )
-elseif (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-  set(${PROJECT_NAME}_SOURCES ${${PROJECT_NAME}_SOURCES}
-    src/platform/install_osx.cpp
-    src/platform/install_osx.h
-  )
 endif()
 
 if (UNIX)
@@ -658,6 +645,9 @@ MESSAGE( STATUS "CMAKE_C_FLAGS: " ${CMAKE_C_FLAGS} )
 # the compiler flags for compiling C++ sources
 MESSAGE( STATUS "CMAKE_CXX_FLAGS: " ${CMAKE_CXX_FLAGS} )
 
+add_subdirectory(util)
+add_subdirectory(audio)
+
 add_library(${PROJECT_NAME}_static
   STATIC
   ${${PROJECT_NAME}_FORMS}
@@ -667,6 +657,9 @@ add_library(${PROJECT_NAME}_static
 target_link_libraries(${PROJECT_NAME}_static
   ${CMAKE_REQUIRED_LIBRARIES}
   ${ALL_LIBRARIES})
+
+target_link_libraries(${PROJECT_NAME}_static util_library)
+target_link_libraries(${PROJECT_NAME}_static audio_library)
 
 add_executable(${PROJECT_NAME}
   WIN32

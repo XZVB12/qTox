@@ -38,6 +38,7 @@
 #include <QWindow>
 #endif
 
+#include "audio/audio.h"
 #include "circlewidget.h"
 #include "contentdialog.h"
 #include "contentlayout.h"
@@ -47,7 +48,6 @@
 #include "maskablepixmapwidget.h"
 #include "splitterrestorer.h"
 #include "form/groupchatform.h"
-#include "src/audio/audio.h"
 #include "src/chatlog/content/filetransferwidget.h"
 #include "src/core/core.h"
 #include "src/core/coreav.h"
@@ -107,8 +107,9 @@ bool tryRemoveFile(const QString& filepath)
     tmp.remove();
     return writable;
 }
+} // namespace
 
-void acceptFileTransfer(const ToxFile& file, const QString& path)
+void Widget::acceptFileTransfer(const ToxFile& file, const QString& path)
 {
     QString filepath;
     int number = 0;
@@ -127,18 +128,18 @@ void acceptFileTransfer(const ToxFile& file, const QString& path)
     // Do not automatically accept the file-transfer if the path is not writable.
     // The user can still accept it manually.
     if (tryRemoveFile(filepath)) {
-        CoreFile* coreFile = Core::getInstance()->getCoreFile();
+        CoreFile* coreFile = core->getCoreFile();
         coreFile->acceptFileRecvRequest(file.friendId, file.fileNum, filepath);
     } else {
         qWarning() << "Cannot write to " << filepath;
     }
 }
-} // namespace
 
 Widget* Widget::instance{nullptr};
 
-Widget::Widget(IAudioControl& audio, QWidget* parent)
+Widget::Widget(Profile &_profile, IAudioControl& audio, QWidget* parent)
     : QMainWindow(parent)
+    , profile{_profile}
     , trayMenu{nullptr}
     , ui(new Ui::MainWindow)
     , activeChatroomWidget{nullptr}
@@ -246,7 +247,9 @@ void Widget::init()
 
     ui->searchContactFilterBox->setMenu(filterMenu);
 
-    contactListWidget = new FriendListWidget(this, settings.getGroupchatPosition());
+    core = &profile.getCore();
+
+    contactListWidget = new FriendListWidget(*core, this, settings.getGroupchatPosition());
     connect(contactListWidget, &FriendListWidget::searchCircle, this, &Widget::searchCircle);
     connect(contactListWidget, &FriendListWidget::connectCircleWidget, this,
             &Widget::connectCircleWidget);
@@ -274,22 +277,27 @@ void Widget::init()
     Style::setThemeColor(settings.getThemeColor());
 
     filesForm = new FilesForm();
-    addFriendForm = new AddFriendForm;
+    addFriendForm = new AddFriendForm(core->getSelfId());
     groupInviteForm = new GroupInviteForm;
+
 #if UPDATE_CHECK_ENABLED
     updateCheck = std::unique_ptr<UpdateCheck>(new UpdateCheck(settings));
     connect(updateCheck.get(), &UpdateCheck::updateAvailable, this, &Widget::onUpdateAvailable);
 #endif
-    settingsWidget = new SettingsWidget(updateCheck.get(), audio, this);
+    settingsWidget = new SettingsWidget(updateCheck.get(), audio, core, this);
 #if UPDATE_CHECK_ENABLED
     updateCheck->checkForUpdate();
 #endif
 
-    core = Nexus::getCore();
     CoreFile* coreFile = core->getCoreFile();
     Profile* profile = Nexus::getProfile();
     profileInfo = new ProfileInfo(core, profile);
     profileForm = new ProfileForm(profileInfo);
+
+#if DESKTOP_NOTIFICATIONS
+    notificationGenerator.reset(new NotificationGenerator(settings, profile));
+    connect(&notifier, &DesktopNotify::notificationClosed, notificationGenerator.get(), &NotificationGenerator::onNotificationActivated);
+#endif
 
     // connect logout tray menu action
     connect(actionLogout, &QAction::triggered, profileForm, &ProfileForm::onLogoutClicked);
@@ -1077,7 +1085,7 @@ void Widget::dispatchFile(ToxFile file)
 
     if (file.status == ToxFile::INITIALIZING && file.direction == ToxFile::RECEIVING) {
         auto sender =
-            (file.direction == ToxFile::SENDING) ? Core::getInstance()->getSelfPublicKey() : pk;
+            (file.direction == ToxFile::SENDING) ? core->getSelfPublicKey() : pk;
 
         const Settings& settings = Settings::getInstance();
         QString autoAcceptDir = settings.getAutoAcceptDir(f->getPublicKey());
@@ -1144,7 +1152,7 @@ void Widget::addFriend(uint32_t friendId, const ToxPk& friendPk)
     auto chatHistory =
         std::make_shared<ChatHistory>(*newfriend, history, *core, Settings::getInstance(),
                                       *friendMessageDispatcher);
-    auto friendForm = new ChatForm(newfriend, *chatHistory, *friendMessageDispatcher);
+    auto friendForm = new ChatForm(profile, newfriend, *chatHistory, *friendMessageDispatcher);
     connect(friendForm, &ChatForm::updateFriendActivity, this, &Widget::updateFriendActivity);
 
     friendMessageDispatchers[friendPk] = friendMessageDispatcher;
@@ -1495,7 +1503,7 @@ void Widget::addGroupDialog(Group* group, ContentDialog* dialog)
     emit widget->chatroomWidgetClicked(widget);
 }
 
-bool Widget::newFriendMessageAlert(const ToxPk& friendId, const QString& text, bool sound, bool file)
+bool Widget::newFriendMessageAlert(const ToxPk& friendId, const QString& text, bool sound, QString filename, size_t filesize)
 {
     bool hasActive;
     QWidget* currentWindow;
@@ -1532,17 +1540,9 @@ bool Widget::newFriendMessageAlert(const ToxPk& friendId, const QString& text, b
         widget->updateStatusLight();
         ui->friendList->trackWidget(widget);
 #if DESKTOP_NOTIFICATIONS
-        if (settings.getNotifyHide()) {
-            notifier.notifyMessageSimple(file ? DesktopNotify::MessageType::FRIEND_FILE
-                                              : DesktopNotify::MessageType::FRIEND);
-        } else {
-            QString title = f->getDisplayedName();
-            if (file) {
-                title += " - " + tr("File sent");
-            }
-            notifier.notifyMessagePixmap(title, text,
-                                         Nexus::getProfile()->loadAvatar(f->getPublicKey()));
-        }
+        auto notificationData = filename.isEmpty() ? notificationGenerator->friendMessageNotification(f, text)
+                                                   : notificationGenerator->fileTransferNotification(f, filename, filesize);
+        notifier.notifyMessage(notificationData);
 #endif
 
         if (contentDialog == nullptr) {
@@ -1583,18 +1583,8 @@ bool Widget::newGroupMessageAlert(const GroupId& groupId, const ToxPk& authorPk,
     g->setEventFlag(true);
     widget->updateStatusLight();
 #if DESKTOP_NOTIFICATIONS
-    if (settings.getNotifyHide()) {
-        notifier.notifyMessageSimple(DesktopNotify::MessageType::GROUP);
-    } else {
-        Friend* f = FriendList::findFriend(authorPk);
-        QString title = g->getPeerList().value(authorPk) + " (" + g->getDisplayedName() + ")";
-        if (!f) {
-            notifier.notifyMessage(title, message);
-        } else {
-            notifier.notifyMessagePixmap(title, message,
-                                         Nexus::getProfile()->loadAvatar(f->getPublicKey()));
-        }
-    }
+    auto notificationData = notificationGenerator->groupMessageNotification(g, authorPk, message);
+    notifier.notifyMessage(notificationData);
 #endif
 
     if (contentDialog == nullptr) {
@@ -1670,11 +1660,8 @@ void Widget::onFriendRequestReceived(const ToxPk& friendPk, const QString& messa
         friendRequestsUpdate();
         newMessageAlert(window(), isActiveWindow(), true, true);
 #if DESKTOP_NOTIFICATIONS
-        if (settings.getNotifyHide()) {
-            notifier.notifyMessageSimple(DesktopNotify::MessageType::FRIEND_REQUEST);
-        } else {
-            notifier.notifyMessage(friendPk.toString() + tr(" sent you a friend request."), message);
-        }
+        auto notificationData = notificationGenerator->friendRequestNotification(friendPk, message);
+        notifier.notifyMessage(notificationData);
 #endif
     }
 }
@@ -1683,9 +1670,8 @@ void Widget::onFileReceiveRequested(const ToxFile& file)
 {
     const ToxPk& friendPk = FriendList::id2Key(file.friendId);
     newFriendMessageAlert(friendPk,
-                          file.fileName + " ("
-                              + FileTransferWidget::getHumanReadableSize(file.filesize) + ")",
-                          true, true);
+                          {},
+                          true, file.fileName, file.filesize);
 }
 
 void Widget::updateFriendActivity(const Friend& frnd)
@@ -1710,7 +1696,7 @@ void Widget::removeFriend(Friend* f, bool fake)
         }
 
         if (ask.removeHistory()) {
-            Nexus::getProfile()->getHistory()->removeFriendHistory(f->getPublicKey().toString());
+            Nexus::getProfile()->getHistory()->removeFriendHistory(f->getPublicKey());
         }
     }
 
@@ -1800,7 +1786,7 @@ void Widget::onUpdateAvailable()
 
 ContentDialog* Widget::createContentDialog() const
 {
-    ContentDialog* contentDialog = new ContentDialog();
+    ContentDialog* contentDialog = new ContentDialog(*core);
 
     registerContentDialog(*contentDialog);
     return contentDialog;
@@ -1931,12 +1917,8 @@ void Widget::onGroupInviteReceived(const GroupInvite& inviteInfo)
             groupInvitesUpdate();
             newMessageAlert(window(), isActiveWindow(), true, true);
 #if DESKTOP_NOTIFICATIONS
-            if (settings.getNotifyHide()) {
-                notifier.notifyMessageSimple(DesktopNotify::MessageType::GROUP_INVITE);
-            } else {
-                notifier.notifyMessagePixmap(f->getDisplayedName() + tr(" invites you to join a group."),
-                                             {}, Nexus::getProfile()->loadAvatar(f->getPublicKey()));
-            }
+            auto notificationData = notificationGenerator->groupInvitationNotification(f);
+            notifier.notifyMessage(notificationData);
 #endif
         }
     } else {
@@ -2075,7 +2057,16 @@ Group* Widget::createGroup(uint32_t groupnumber, const GroupId& groupId)
     const auto groupName = tr("Groupchat #%1").arg(groupnumber);
     const bool enabled = core->getGroupAvEnabled(groupnumber);
     Group* newgroup =
-        GroupList::addGroup(groupnumber, groupId, groupName, enabled, core->getUsername());
+        GroupList::addGroup(*core, groupnumber, groupId, groupName, enabled, core->getUsername());
+    assert(newgroup);
+
+    if (enabled) {
+        connect(newgroup, &Group::userLeft, [=](const ToxPk& user){
+            CoreAV *av = core->getAv();
+            assert(av);
+            av->invalidateGroupCallPeerSource(*newgroup, user);
+        });
+    }
     auto dialogManager = ContentDialogManager::getInstance();
     auto rawChatroom = new GroupChatroom(newgroup, dialogManager);
     std::shared_ptr<GroupChatroom> chatroom(rawChatroom);
@@ -2108,7 +2099,8 @@ Group* Widget::createGroup(uint32_t groupnumber, const GroupId& groupId)
         connect(messageDispatcher.get(), &IMessageDispatcher::messageReceived, notifyReceivedCallback);
     groupAlertConnections.insert(groupId, notifyReceivedConnection);
 
-    auto form = new GroupChatForm(newgroup, *groupChatLog, *messageDispatcher);
+    assert(core != nullptr);
+    auto form = new GroupChatForm(*core, newgroup, *groupChatLog, *messageDispatcher);
     connect(&settings, &Settings::nameColorsChanged, form, &GenericChatForm::setColorizedNames);
     form->setColorizedNames(settings.getEnableGroupChatsColor());
     groupMessageDispatchers[groupId] = messageDispatcher;

@@ -17,8 +17,7 @@
     along with qTox.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef CONTENTDIALOG_H
-#define CONTENTDIALOG_H
+#pragma once
 
 #include "src/core/groupid.h"
 #include "src/core/toxpk.h"
@@ -33,6 +32,7 @@ template <typename K, typename V>
 class QHash;
 
 class ContentLayout;
+class Core;
 class Friend;
 class FriendChatroom;
 class FriendListLayout;
@@ -49,7 +49,7 @@ class ContentDialog : public ActivateDialog, public IDialogs
 {
     Q_OBJECT
 public:
-    explicit ContentDialog(QWidget* parent = nullptr);
+    explicit ContentDialog(const Core& core, QWidget* parent = nullptr);
     ~ContentDialog() override;
 
     FriendWidget* addFriend(std::shared_ptr<FriendChatroom> chatroom, GenericChatForm* form);
@@ -133,5 +133,3 @@ private:
 
     QString username;
 };
-
-#endif // CONTENTDIALOG_H

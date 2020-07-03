@@ -18,15 +18,16 @@
     along with qTox.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef SETTINGS_HPP
-#define SETTINGS_HPP
+#pragma once
 
-#include "src/audio/iaudiosettings.h"
+#include "audio/iaudiosettings.h"
 #include "src/core/icoresettings.h"
 #include "src/core/toxencrypt.h"
 #include "src/core/toxfile.h"
+#include "src/persistence/paths.h"
 #include "src/persistence/ifriendsettings.h"
 #include "src/persistence/igroupsettings.h"
+#include "src/persistence/inotificationsettings.h"
 #include "src/video/ivideosettings.h"
 
 #include <QDateTime>
@@ -50,7 +51,8 @@ class Settings : public QObject,
                  public IFriendSettings,
                  public IGroupSettings,
                  public IAudioSettings,
-                 public IVideoSettings
+                 public IVideoSettings,
+                 public INotificationSettings
 {
     Q_OBJECT
 
@@ -143,10 +145,8 @@ public:
 public:
     static Settings& getInstance();
     static void destroyInstance();
-    QString getSettingsDirPath() const;
-    QString getAppDataDirPath() const;
-    QString getAppCacheDirPath() const;
 
+    Paths& getPaths();
     void createSettingsDir();
     void createPersonal(const QString& basename) const;
 
@@ -313,23 +313,23 @@ public:
     bool getCheckUpdates() const;
     void setCheckUpdates(bool newValue);
 
-    bool getNotify() const;
-    void setNotify(bool newValue);
+    bool getNotify() const override;
+    void setNotify(bool newValue) override;
 
-    bool getShowWindow() const;
-    void setShowWindow(bool newValue);
+    bool getShowWindow() const override;
+    void setShowWindow(bool newValue) override;
 
-    bool getDesktopNotify() const;
-    void setDesktopNotify(bool enabled);
+    bool getDesktopNotify() const override;
+    void setDesktopNotify(bool enabled) override;
 
-    bool getNotifySound() const;
-    void setNotifySound(bool newValue);
+    bool getNotifySound() const override;
+    void setNotifySound(bool newValue) override;
 
-    bool getNotifyHide() const;
-    void setNotifyHide(bool newValue);
+    bool getNotifyHide() const override;
+    void setNotifyHide(bool newValue) override;
 
-    bool getBusySound() const;
-    void setBusySound(bool newValue);
+    bool getBusySound() const override;
+    void setBusySound(bool newValue) override;
 
     bool getGroupAlwaysNotify() const override;
     void setGroupAlwaysNotify(bool newValue) override;
@@ -707,6 +707,5 @@ private:
     static Settings* settings;
     static const QString globalSettingsFile;
     static QThread* settingsThread;
+    Paths paths;
 };
-
-#endif // SETTINGS_HPP

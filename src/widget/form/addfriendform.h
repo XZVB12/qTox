@@ -17,8 +17,7 @@
     along with qTox.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef ADDFRIENDFORM_H
-#define ADDFRIENDFORM_H
+#pragma once
 
 #include "src/core/toxid.h"
 
@@ -46,7 +45,7 @@ public:
         FriendRequest = 2
     };
 
-    AddFriendForm();
+    AddFriendForm(ToxId _ownId);
     AddFriendForm(const AddFriendForm&) = delete;
     AddFriendForm& operator=(const AddFriendForm&) = delete;
     ~AddFriendForm();
@@ -112,6 +111,6 @@ private:
     QList<QPushButton*> acceptButtons;
     QList<QPushButton*> rejectButtons;
     QList<QString> contactsToImport;
-};
 
-#endif // ADDFRIENDFORM_H
+    ToxId ownId;
+};

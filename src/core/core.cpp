@@ -28,14 +28,16 @@
 #include "src/core/toxstring.h"
 #include "src/model/groupinvite.h"
 #include "src/model/status.h"
-#include "src/net/bootstrapnodeupdater.h"
+#include "src/model/ibootstraplistgenerator.h"
 #include "src/nexus.h"
 #include "src/persistence/profile.h"
-#include "src/util/strongtype.h"
+#include "util/strongtype.h"
 
 #include <QCoreApplication>
-#if (QT_VERSION >= QT_VERSION_CHECK(5, 15, 0))
+#if (QT_VERSION >= QT_VERSION_CHECK(5, 10, 0))
 #include <QRandomGenerator>
+#else
+#include <QDateTime>
 #endif
 #include <QRegularExpression>
 #include <QString>
@@ -473,10 +475,11 @@ bool parseErr(Tox_Err_Conference_Delete error, int line)
 
 } // namespace
 
-Core::Core(QThread* coreThread)
+Core::Core(QThread* coreThread, IBootstrapListGenerator& _bootstrapNodes)
     : tox(nullptr)
     , toxTimer{new QTimer{this}}
     , coreThread(coreThread)
+    , bootstrapNodes(_bootstrapNodes)
 {
     assert(toxTimer);
     toxTimer->setSingleShot(true);
@@ -525,7 +528,7 @@ void Core::registerCallbacks(Tox* tox)
  * @return nullptr or a Core object ready to start
  */
 ToxCorePtr Core::makeToxCore(const QByteArray& savedata, const ICoreSettings* const settings,
-                             ToxCoreErrors* err)
+                             IBootstrapListGenerator& bootstrapNodes, ToxCoreErrors* err)
 {
     QThread* thread = new QThread();
     if (thread == nullptr) {
@@ -543,7 +546,7 @@ ToxCorePtr Core::makeToxCore(const QByteArray& savedata, const ICoreSettings* co
         return {};
     }
 
-    ToxCorePtr core(new Core(thread));
+    ToxCorePtr core(new Core(thread, bootstrapNodes));
     if (core == nullptr) {
         if (err) {
             *err = ToxCoreErrors::ERROR_ALLOC;
@@ -666,6 +669,10 @@ void Core::onStarted()
 {
     ASSERT_CORE_THREAD;
 
+#if (QT_VERSION < QT_VERSION_CHECK(5, 10, 0))
+    qsrand(static_cast<uint>(QDateTime::currentMSecsSinceEpoch()));
+#endif
+
     // One time initialization stuff
     QString name = getUsername();
     if (!name.isEmpty()) {
@@ -785,41 +792,49 @@ void Core::bootstrapDht()
 {
     ASSERT_CORE_THREAD;
 
-    QList<DhtServer> bootstrapNodes = BootstrapNodeUpdater::loadDefaultBootstrapNodes();
+    QList<DhtServer> bootstrapNodesList = bootstrapNodes.getBootstrapnodes();
 
-    int listSize = bootstrapNodes.size();
+    int listSize = bootstrapNodesList.size();
     if (!listSize) {
         qWarning() << "No bootstrap node list";
         return;
     }
 
     int i = 0;
-#if (QT_VERSION >= QT_VERSION_CHECK(5, 15, 0))
-    static int j = QRandomGenerator::global()->generate() % listSize;
+#if (QT_VERSION >= QT_VERSION_CHECK(5, 10, 0))
+    static int j = QRandomGenerator::global()->bounded(listSize);
 #else
-    static int j = qrand() % listSize;
+    static int j = static_cast<int>((static_cast<double>(qrand()) / static_cast<double>(RAND_MAX+1l)) * listSize);
 #endif
     // i think the more we bootstrap, the more we jitter because the more we overwrite nodes
     while (i < 2) {
-        const DhtServer& dhtServer = bootstrapNodes[j % listSize];
-        QString dhtServerAddress = dhtServer.address.toLatin1();
+        const DhtServer& dhtServer = bootstrapNodesList[j % listSize];
         QString port = QString::number(dhtServer.port);
-        QString name = dhtServer.name;
         qDebug("Connecting to bootstrap node %d", j % listSize);
-        QByteArray address = dhtServer.address.toLatin1();
+
+        QByteArray address;
+        if (dhtServer.ipv4.isEmpty() && !dhtServer.ipv6.isEmpty()) {
+            address = dhtServer.ipv6.toLatin1();
+        } else {
+            address = dhtServer.ipv4.toLatin1();
+        }
+
         // TODO: constucting the pk via ToxId is a workaround
         ToxPk pk = ToxId{dhtServer.userId}.getPublicKey();
-
         const uint8_t* pkPtr = pk.getData();
 
         Tox_Err_Bootstrap error;
-        tox_bootstrap(tox.get(), address.constData(), dhtServer.port, pkPtr, &error);
-        PARSE_ERR(error);
+        if (dhtServer.statusUdp) {
+            tox_bootstrap(tox.get(), address.constData(), dhtServer.port, pkPtr, &error);
+            PARSE_ERR(error);
+        }
+        if (dhtServer.statusTcp) {
+            tox_add_tcp_relay(tox.get(), address.constData(), dhtServer.port, pkPtr, &error);
+            PARSE_ERR(error);
+        }
 
-        tox_add_tcp_relay(tox.get(), address.constData(), dhtServer.port, pkPtr, &error);
-        PARSE_ERR(error);
-
-        ++j;
+        // bootstrap off every 5th node (+ a special case to avoid cycles when listSize % 5 == 0)
+        j += 5 + !(listSize % 5);
         ++i;
     }
 }
