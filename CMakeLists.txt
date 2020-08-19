@@ -73,8 +73,20 @@ project(qtox)
 
 # Instruct CMake to run moc automatically when needed.
 set(CMAKE_AUTOMOC ON)
+# Run resource compilation automatically
+set(CMAKE_AUTORCC ON)
+# Enable maximum compression
+set(AUTORCC_OPTIONS -compress 9 -threshold 0)
 
-set(RCC_OPTIONS -compress 9 -threshold 0)
+
+if(NOT Qt5Widgets_VERSION VERSION_LESS "5.9")
+  # Drop the file modification time of source files from generated files
+  # to help with reproducible builds. We do not use QFileInfo.lastModified
+  # so this has no unwanted side effects. This mtime started appearing in
+  # Qt 5.8. The option to force the old file format without mtime was
+  # added in Qt 5.9. See https://bugreports.qt.io/browse/QTBUG-58769
+  set(AUTORCC_OPTIONS ${AUTORCC_OPTIONS} -format-version 1)
+endif()
 
 # Use C++11.
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
@@ -133,14 +145,6 @@ include_directories(${CMAKE_SOURCE_DIR})
 
 include(Dependencies)
 
-if(NOT Qt5Widgets_VERSION VERSION_LESS "5.9")
-  # Drop the file modification time of source files from generated files
-  # to help with reproducible builds. We do not use QFileInfo.lastModified
-  # so this has no unwanted side effects. This mtime started appearing in
-  # Qt 5.8. The option to force the old file format without mtime was
-  # added in Qt 5.9. See https://bugreports.qt.io/browse/QTBUG-58769
-  set(RCC_OPTIONS ${RCC_OPTIONS} -format-version 1)
-endif()
 
 ################################################################################
 #
@@ -165,57 +169,8 @@ qt5_wrap_ui(${PROJECT_NAME}_FORMS
   src/widget/form/settings/privacysettings.ui
   src/widget/form/settings/userinterfacesettings.ui)
 
-qt5_add_translation(${PROJECT_NAME}_QM_FILES
-  translations/ar.ts
-  translations/be.ts
-  translations/bg.ts
-  translations/cs.ts
-  translations/da.ts
-  translations/de.ts
-  translations/el.ts
-  translations/eo.ts
-  translations/es.ts
-  translations/et.ts
-  translations/fa.ts
-  translations/fi.ts
-  translations/fr.ts
-  translations/he.ts
-  translations/hr.ts
-  translations/hu.ts
-  translations/it.ts
-  translations/ja.ts
-  translations/jbo.ts
-  translations/ko.ts
-  translations/lt.ts
-  translations/mk.ts
-  translations/nl.ts
-  translations/no_nb.ts
-  translations/pl.ts
-  translations/pr.ts
-  translations/pt.ts
-  translations/pt_BR.ts
-  translations/ro.ts
-  translations/ru.ts
-  translations/sk.ts
-  translations/sl.ts
-  translations/sr.ts
-  translations/sr_Latn.ts
-  translations/sv.ts
-  translations/sw.ts
-  translations/ta.ts
-  translations/tr.ts
-  translations/ug.ts
-  translations/uk.ts
-  translations/zh_CN.ts
-  translations/zh_TW.ts
-)
-
-qt5_add_resources(
-  ${PROJECT_NAME}_RESOURCES
-  res.qrc
-  ${CMAKE_CURRENT_BINARY_DIR}/translations.qrc
-  DEPENDS ${${PROJECT_NAME}_QM_FILES}
-  OPTIONS ${RCC_OPTIONS}
+set(${PROJECT_NAME}_RESOURCES
+    res.qrc
 )
 
 if(NOT SMILEYS)
@@ -223,38 +178,17 @@ if(NOT SMILEYS)
 endif()
 
 if(NOT "${SMILEYS}" STREQUAL "DISABLED")
-  qt5_add_resources(
-          ${PROJECT_NAME}_RESOURCES
-          smileys/emojione.qrc
-          OPTIONS ${RCC_OPTIONS})
+  set(${PROJECT_NAME}_RESOURCES
+        ${${PROJECT_NAME}_RESOURCES}
+        smileys/emojione.qrc)
 
   if(NOT "${SMILEYS}" STREQUAL "MIN")
-    qt5_add_resources(
-            ${PROJECT_NAME}_RESOURCES
-            smileys/smileys.qrc
-            OPTIONS ${RCC_OPTIONS})
+      set(${PROJECT_NAME}_RESOURCES
+            ${${PROJECT_NAME}_RESOURCES}
+            smileys/smileys.qrc)
   endif()
 
 endif()
-
-file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/translations.qrc.in"
-"<!DOCTYPE RCC>
-<RCC version=\"1.0\">
-  <qresource prefix=\"/translations\">
-")
-foreach(qm ${${PROJECT_NAME}_QM_FILES})
-  get_filename_component(qm_name ${qm} NAME)
-  file(APPEND "${CMAKE_CURRENT_BINARY_DIR}/translations.qrc.in"
-    "    <file alias=\"${qm_name}\">${qm}</file>\n")
-endforeach(qm)
-file(APPEND "${CMAKE_CURRENT_BINARY_DIR}/translations.qrc.in"
-"  </qresource>
-</RCC>
-")
-
-execute_process(COMMAND ${CMAKE_COMMAND} -E copy_if_different
-  ${CMAKE_CURRENT_BINARY_DIR}/translations.qrc.in
-  ${CMAKE_CURRENT_BINARY_DIR}/translations.qrc)
 
 set(${PROJECT_NAME}_SOURCES
   src/chatlog/chatlinecontent.cpp
@@ -526,8 +460,6 @@ set(${PROJECT_NAME}_SOURCES
   src/widget/tool/croppinglabel.h
   src/widget/tool/flyoutoverlaywidget.cpp
   src/widget/tool/flyoutoverlaywidget.h
-  src/widget/tool/friendrequestdialog.cpp
-  src/widget/tool/friendrequestdialog.h
   src/widget/tool/identicon.cpp
   src/widget/tool/identicon.h
   src/widget/tool/movablewidget.cpp
@@ -557,6 +489,7 @@ if (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
     src/platform/camera/directshow.cpp
     src/platform/camera/directshow.h
   )
+
   set(${PROJECT_NAME}_RESOURCES ${${PROJECT_NAME}_RESOURCES}
     windows/qtox.rc
   )
@@ -647,19 +580,19 @@ MESSAGE( STATUS "CMAKE_CXX_FLAGS: " ${CMAKE_CXX_FLAGS} )
 
 add_subdirectory(util)
 add_subdirectory(audio)
+add_subdirectory(translations)
 
 add_library(${PROJECT_NAME}_static
   STATIC
   ${${PROJECT_NAME}_FORMS}
-  ${${PROJECT_NAME}_SOURCES}
-  ${${PROJECT_NAME}_QM_FILES}
-  ${${PROJECT_NAME}_RESOURCES})
+  ${${PROJECT_NAME}_SOURCES})
 target_link_libraries(${PROJECT_NAME}_static
   ${CMAKE_REQUIRED_LIBRARIES}
   ${ALL_LIBRARIES})
 
 target_link_libraries(${PROJECT_NAME}_static util_library)
 target_link_libraries(${PROJECT_NAME}_static audio_library)
+target_link_libraries(${PROJECT_NAME}_static translations_library)
 
 add_executable(${PROJECT_NAME}
   WIN32

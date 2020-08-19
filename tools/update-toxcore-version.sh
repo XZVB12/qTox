@@ -51,7 +51,7 @@ update_osx() {
 
 update_flatpak() {
     cd flatpak
-    latest_tag_ref=$(git ls-remote --tags https://github.com/toktok/c-toxcore | tail -n1)
+    latest_tag_ref=$(git ls-remote --tags https://github.com/toktok/c-toxcore | sort -V -k2 | tail -n1)
     ref_array=($latest_tag_ref)
     commit_hash=${ref_array[0]}
     perl -i -0pe "s|(https://github.com/toktok/c-toxcore.*?)$VERSION_PATTERN(.*?)[a-f0-9]{40}|\${1}$@\${2}$commit_hash|gms" io.github.qtox.qTox.json
@@ -69,6 +69,13 @@ update_docker() {
     perl -i -0pe "s|(https://github.com/toktok/c-toxcore.*?)$VERSION_PATTERN|\${1}$@|gms" Dockerfile.debian
     perl -i -0pe "s|(https://github.com/toktok/c-toxcore.*?)$VERSION_PATTERN|\${1}$@|gms" Dockerfile.ubuntu
     cd ..
+}
+
+update_windows() {
+    cd windows/cross-compile
+    perl -i -0pe "s|(TOXCORE_VERSION=)$VERSION_PATTERN|\${1}$@|gms" build.sh
+    echo "Manually update the Windows toxcore hash in windows/cross-compile/build.sh"
+    cd ../..
 }
 
 # exit if supplied arg is not a version
@@ -89,5 +96,6 @@ main() {
     update_flatpak "$@"
     update_travis "$@"
     update_docker "$@"
+    update_windows "$@"
 }
 main "$@"

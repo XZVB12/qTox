@@ -69,7 +69,7 @@ build_toxcore() {
     [[ $TRAVIS != true ]] \
     && sleep 3
 
-    mkdir _build && cd _build
+    mkdir -p _build && cd _build
     fcho "Starting cmake ..."
     #Make sure the correct version of libsodium is used
     cmake -DBOOTSTRAP_DAEMON=OFF -DLIBSODIUM_CFLAGS="-I${LS_DIR_VER}/include/" -DLIBSODIUM_LDFLAGS="L${LS_DIR_VER}/lib/" -DCMAKE_INSTALL_PREFIX="${LIB_INSTALL_PREFIX}" ..
@@ -138,10 +138,10 @@ install() {
 
     #cd $MAIN_DIR # just in case
     # Toxcore
-    if [[ -e $TOX_DIR/.git/index ]]
+    if [[ -e $TOXCORE_DIR/.git/index ]]
     then
         fcho "Toxcore git repo already in place !"
-        cd $TOX_DIR
+        cd $TOXCORE_DIR
         git pull
     else
         fcho "Cloning Toxcore git ... "
@@ -295,7 +295,7 @@ bootstrap() {
     build_toxcore
 
     #Boot Strap
-    fcho "Running: sudo ${QTOX_DIR_VER}/bootstrap-osx.sh"
+    fcho "Running: sudo ${QTOX_DIR}/bootstrap-osx.sh"
     cd $QTOX_DIR
     sudo ./bootstrap-osx.sh
 }
