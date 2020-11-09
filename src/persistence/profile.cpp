@@ -232,7 +232,7 @@ bool logCreateToxDataError(const CreateToxDataError& error, const QString& userN
 
 QStringList Profile::profiles;
 
-void Profile::initCore(const QByteArray& toxsave, const ICoreSettings& s, bool isNewProfile)
+void Profile::initCore(const QByteArray& toxsave, Settings& s, bool isNewProfile)
 {
     if (toxsave.isEmpty() && !isNewProfile) {
         qCritical() << "Existing toxsave is empty";
@@ -245,7 +245,7 @@ void Profile::initCore(const QByteArray& toxsave, const ICoreSettings& s, bool i
     }
 
     bootstrapNodes = std::unique_ptr<BootstrapNodeUpdater>(
-        new BootstrapNodeUpdater(Settings::getInstance().getProxy(), paths));
+        new BootstrapNodeUpdater(s.getProxy(), paths));
 
     Core::ToxCoreErrors err;
     core = Core::makeToxCore(toxsave, &s, *bootstrapNodes, &err);
@@ -265,6 +265,17 @@ void Profile::initCore(const QByteArray& toxsave, const ICoreSettings& s, bool i
         return;
     }
 
+    coreAv = CoreAV::makeCoreAV(core->getTox(), core->getCoreLoopLock(), s, s);
+    if (!coreAv) {
+        qDebug() << "Failed to start ToxAV";
+        emit failedToStart();
+        return;
+    }
+
+    // Tell Core that we run with AV before doing anything else
+    core->setAv(coreAv.get());
+    coreAv->start();
+
     if (isNewProfile) {
         core->setStatusMessage(tr("Toxing on qTox"));
         core->setUsername(name);
@@ -282,12 +293,13 @@ void Profile::initCore(const QByteArray& toxsave, const ICoreSettings& s, bool i
     avatarBroadcaster = std::unique_ptr<AvatarBroadcaster>(new AvatarBroadcaster(*core));
 }
 
-Profile::Profile(const QString& name, const QString& password, std::unique_ptr<ToxEncrypt> passkey, Paths& paths_)
+Profile::Profile(const QString& name, std::unique_ptr<ToxEncrypt> passkey, Paths& paths_, Settings& settings_)
     : name{name}
     , passkey{std::move(passkey)}
     , isRemoved{false}
     , encrypted{this->passkey != nullptr}
     , paths{paths_}
+    , settings{settings_}
 {}
 
 /**
@@ -313,14 +325,15 @@ Profile* Profile::loadProfile(const QString& name, const QString& password, Sett
 
     LoadToxDataError error;
     QByteArray toxsave = QByteArray();
-    QString path = settings.getPaths().getSettingsDirPath() + name + ".tox";
+    Paths& paths = settings.getPaths();
+    QString path = paths.getSettingsDirPath() + name + ".tox";
     std::unique_ptr<ToxEncrypt> tmpKey = loadToxData(password, path, toxsave, error);
     if (logLoadToxDataError(error, path)) {
         ProfileLocker::unlock();
         return nullptr;
     }
 
-    Profile* p = new Profile(name, password, std::move(tmpKey), settings.getPaths());
+    Profile* p = new Profile(name, std::move(tmpKey), paths, settings);
 
     // Core settings are saved per profile, need to load them before starting Core
     settings.updateProfileData(p, parser);
@@ -343,7 +356,8 @@ Profile* Profile::createProfile(const QString& name, const QString& password, Se
                                 const QCommandLineParser* parser)
 {
     CreateToxDataError error;
-    QString path = Settings::getInstance().getPaths().getSettingsDirPath() + name + ".tox";
+    Paths& paths = settings.getPaths();
+    QString path = paths.getSettingsDirPath() + name + ".tox";
     std::unique_ptr<ToxEncrypt> tmpKey = createToxData(name, password, path, error);
 
     if (logCreateToxDataError(error, name)) {
@@ -351,7 +365,7 @@ Profile* Profile::createProfile(const QString& name, const QString& password, Se
     }
 
     settings.createPersonal(name);
-    Profile* p = new Profile(name, password, std::move(tmpKey), settings.getPaths());
+    Profile* p = new Profile(name, std::move(tmpKey), paths, settings);
     settings.updateProfileData(p, parser);
 
     p->initCore(QByteArray(), settings, /*isNewProfile*/ true);
@@ -366,8 +380,8 @@ Profile::~Profile()
     }
 
     onSaveToxSave();
-    Settings::getInstance().savePersonal(this);
-    Settings::getInstance().sync();
+    settings.savePersonal(this);
+    settings.sync();
     ProfileLocker::assertLock();
     assert(ProfileLocker::getCurLockName() == name);
     ProfileLocker::unlock();
@@ -477,7 +491,7 @@ bool Profile::saveToxSave(QByteArray data)
     ProfileLocker::assertLock();
     assert(ProfileLocker::getCurLockName() == name);
 
-    QString path = Settings::getInstance().getPaths().getSettingsDirPath() + name + ".tox";
+    QString path = paths.getSettingsDirPath() + name + ".tox";
     qDebug() << "Saving tox save to " << path;
     QSaveFile saveFile(path);
     if (!saveFile.open(QIODevice::WriteOnly)) {
@@ -519,7 +533,7 @@ QString Profile::avatarPath(const ToxPk& owner, bool forceUnencrypted)
 {
     const QString ownerStr = owner.toString();
     if (!encrypted || forceUnencrypted) {
-        return Settings::getInstance().getPaths().getSettingsDirPath() + "avatars/" + ownerStr + ".png";
+        return paths.getSettingsDirPath() + "avatars/" + ownerStr + ".png";
     }
 
     QByteArray idData = ownerStr.toUtf8();
@@ -533,7 +547,7 @@ QString Profile::avatarPath(const ToxPk& owner, bool forceUnencrypted)
     QByteArray hash(hashSize, 0);
     crypto_generichash(reinterpret_cast<uint8_t*>(hash.data()), hashSize, reinterpret_cast<uint8_t*>(idData.data()), idData.size(),
                        reinterpret_cast<uint8_t*>(pubkeyData.data()), pubkeyData.size());
-    return Settings::getInstance().getPaths().getSettingsDirPath() + "avatars/" + hash.toHex().toUpper() + ".png";
+    return paths.getSettingsDirPath() + "avatars/" + hash.toHex().toUpper() + ".png";
 }
 
 /**
@@ -553,7 +567,7 @@ QPixmap Profile::loadAvatar()
 QPixmap Profile::loadAvatar(const ToxPk& owner)
 {
     QPixmap pic;
-    if (Settings::getInstance().getShowIdenticons()) {
+    if (settings.getShowIdenticons()) {
 
         const QByteArray avatarData = loadAvatarData(owner);
         if (avatarData.isEmpty()) {
@@ -641,7 +655,7 @@ void Profile::setAvatar(QByteArray pic)
         pixmap.loadFromData(pic);
         avatarData = pic;
     } else {
-        if (Settings::getInstance().getShowIdenticons()) {
+        if (settings.getShowIdenticons()) {
             const QImage identicon = Identicon(selfPk.getByteArray()).toImage(32);
             pixmap = QPixmap::fromImage(identicon);
 
@@ -671,7 +685,7 @@ void Profile::setFriendAvatar(const ToxPk& owner, QByteArray pic)
         pixmap.loadFromData(pic);
         avatarData = pic;
         emit friendAvatarSet(owner, pixmap);
-    } else if (Settings::getInstance().getShowIdenticons()) {
+    } else if (settings.getShowIdenticons()) {
         const QImage identicon = Identicon(owner.getByteArray()).toImage(32);
         pixmap = QPixmap::fromImage(identicon);
         emit friendAvatarSet(owner, pixmap);
@@ -712,7 +726,7 @@ void Profile::saveAvatar(const ToxPk& owner, const QByteArray& avatar)
     const QByteArray& pic = needEncrypt ? passkey->encrypt(avatar) : avatar;
 
     QString path = avatarPath(owner);
-    QDir(Settings::getInstance().getPaths().getSettingsDirPath()).mkdir("avatars");
+    QDir(paths.getSettingsDirPath()).mkdir("avatars");
     if (pic.isEmpty()) {
         QFile::remove(path);
     } else {
@@ -762,7 +776,7 @@ void Profile::removeFriendAvatar(const ToxPk& owner)
  */
 bool Profile::isHistoryEnabled()
 {
-    return Settings::getInstance().getEnableLogging() && history;
+    return settings.getEnableLogging() && history;
 }
 
 /**
@@ -846,7 +860,7 @@ QStringList Profile::remove()
             i--;
         }
     }
-    QString path = Settings::getInstance().getPaths().getSettingsDirPath() + name;
+    QString path = paths.getSettingsDirPath() + name;
     ProfileLocker::unlock();
 
     QFile profileMain{path + ".tox"};
@@ -882,8 +896,8 @@ QStringList Profile::remove()
  */
 bool Profile::rename(QString newName)
 {
-    QString path = Settings::getInstance().getPaths().getSettingsDirPath() + name,
-            newPath = Settings::getInstance().getPaths().getSettingsDirPath() + newName;
+    QString path = paths.getSettingsDirPath() + name,
+            newPath = paths.getSettingsDirPath() + newName;
 
     if (!ProfileLocker::lock(newName)) {
         return false;
@@ -895,11 +909,11 @@ bool Profile::rename(QString newName)
         database->rename(newName);
     }
 
-    bool resetAutorun = Settings::getInstance().getAutorun();
-    Settings::getInstance().setAutorun(false);
-    Settings::getInstance().setCurrentProfile(newName);
+    bool resetAutorun = settings.getAutorun();
+    settings.setAutorun(false);
+    settings.setCurrentProfile(newName);
     if (resetAutorun) {
-        Settings::getInstance().setAutorun(true); // fixes -p flag in autostart command line
+        settings.setAutorun(true); // fixes -p flag in autostart command line
     }
 
     name = newName;

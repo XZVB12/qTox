@@ -104,15 +104,16 @@ private slots:
     void onAvatarOfferReceived(uint32_t friendId, uint32_t fileId, const QByteArray& avatarHash);
 
 private:
-    Profile(const QString& name, const QString& password, std::unique_ptr<ToxEncrypt> passkey, Paths& paths);
+    Profile(const QString& name, std::unique_ptr<ToxEncrypt> passkey, Paths& paths, Settings &settings_);
     static QStringList getFilesByExt(QString extension);
     QString avatarPath(const ToxPk& owner, bool forceUnencrypted = false);
     bool saveToxSave(QByteArray data);
-    void initCore(const QByteArray& toxsave, const ICoreSettings& s, bool isNewProfile);
+    void initCore(const QByteArray& toxsave, Settings &s, bool isNewProfile);
 
 private:
     std::unique_ptr<AvatarBroadcaster> avatarBroadcaster;
     std::unique_ptr<Core> core;
+    std::unique_ptr<CoreAV> coreAv;
     QString name;
     std::unique_ptr<ToxEncrypt> passkey;
     std::shared_ptr<RawDatabase> database;
@@ -122,4 +123,5 @@ private:
     static QStringList profiles;
     std::unique_ptr<BootstrapNodeUpdater> bootstrapNodes;
     Paths& paths;
+    Settings& settings;
 };
