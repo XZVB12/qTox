@@ -27,7 +27,7 @@
 #include "src/core/toxpk.h"
 
 namespace {
-static constexpr int SCHEMA_VERSION = 5;
+static constexpr int SCHEMA_VERSION = 6;
 
 bool createCurrentSchema(RawDatabase& db)
 {
@@ -67,8 +67,10 @@ bool createCurrentSchema(RawDatabase& db)
         "direction INTEGER NOT NULL, "
         "file_state INTEGER NOT NULL);"
         "CREATE TABLE faux_offline_pending (id INTEGER PRIMARY KEY, "
+        "required_extensions INTEGER NOT NULL DEFAULT 0, "
         "FOREIGN KEY (id) REFERENCES history(id));"
         "CREATE TABLE broken_messages (id INTEGER PRIMARY KEY, "
+        "reason INTEGER NOT NULL DEFAULT 0, "
         "FOREIGN KEY (id) REFERENCES history(id));"));
     // sqlite doesn't support including the index as part of the CREATE TABLE statement, so add a second query
     queries += RawDatabase::Query(
@@ -95,20 +97,17 @@ bool isNewDb(std::shared_ptr<RawDatabase>& db, bool& success)
 bool dbSchema0to1(RawDatabase& db)
 {
     QVector<RawDatabase::Query> queries;
-    queries +=
-        RawDatabase::Query(QStringLiteral(
-            "CREATE TABLE file_transfers "
-            "(id INTEGER PRIMARY KEY, "
-            "chat_id INTEGER NOT NULL, "
-            "file_restart_id BLOB NOT NULL, "
-            "file_name BLOB NOT NULL, "
-            "file_path BLOB NOT NULL, "
-            "file_hash BLOB NOT NULL, "
-            "file_size INTEGER NOT NULL, "
-            "direction INTEGER NOT NULL, "
-            "file_state INTEGER NOT NULL);"));
-    queries +=
-        RawDatabase::Query(QStringLiteral("ALTER TABLE history ADD file_id INTEGER;"));
+    queries += RawDatabase::Query(QStringLiteral("CREATE TABLE file_transfers "
+                                                 "(id INTEGER PRIMARY KEY, "
+                                                 "chat_id INTEGER NOT NULL, "
+                                                 "file_restart_id BLOB NOT NULL, "
+                                                 "file_name BLOB NOT NULL, "
+                                                 "file_path BLOB NOT NULL, "
+                                                 "file_hash BLOB NOT NULL, "
+                                                 "file_size INTEGER NOT NULL, "
+                                                 "direction INTEGER NOT NULL, "
+                                                 "file_state INTEGER NOT NULL);"));
+    queries += RawDatabase::Query(QStringLiteral("ALTER TABLE history ADD file_id INTEGER;"));
     queries += RawDatabase::Query(QStringLiteral("PRAGMA user_version = 1;"));
     return db.execNow(queries);
 }
@@ -120,29 +119,29 @@ bool dbSchema1to2(RawDatabase& db)
     // faux_offline_pending to broken_messages
 
     // the last non-pending message in each chat
-    QString lastDeliveredQuery = QString(
-        "SELECT chat_id, MAX(history.id) FROM "
-        "history JOIN peers chat ON chat_id = chat.id "
-        "LEFT JOIN faux_offline_pending ON history.id = faux_offline_pending.id "
-        "WHERE faux_offline_pending.id IS NULL "
-        "GROUP BY chat_id;");
+    QString lastDeliveredQuery =
+        QString("SELECT chat_id, MAX(history.id) FROM "
+                "history JOIN peers chat ON chat_id = chat.id "
+                "LEFT JOIN faux_offline_pending ON history.id = faux_offline_pending.id "
+                "WHERE faux_offline_pending.id IS NULL "
+                "GROUP BY chat_id;");
 
     QVector<RawDatabase::Query> upgradeQueries;
-    upgradeQueries +=
-        RawDatabase::Query(QStringLiteral(
-            "CREATE TABLE broken_messages "
-            "(id INTEGER PRIMARY KEY);"));
+    upgradeQueries += RawDatabase::Query(QStringLiteral("CREATE TABLE broken_messages "
+                                                        "(id INTEGER PRIMARY KEY);"));
 
     auto rowCallback = [&upgradeQueries](const QVector<QVariant>& row) {
         auto chatId = row[0].toLongLong();
         auto lastDeliveredHistoryId = row[1].toLongLong();
 
         upgradeQueries += QString("INSERT INTO broken_messages "
-            "SELECT faux_offline_pending.id FROM "
-            "history JOIN faux_offline_pending "
-            "ON faux_offline_pending.id = history.id "
-            "WHERE history.chat_id=%1 "
-            "AND history.id < %2;").arg(chatId).arg(lastDeliveredHistoryId);
+                                  "SELECT faux_offline_pending.id FROM "
+                                  "history JOIN faux_offline_pending "
+                                  "ON faux_offline_pending.id = history.id "
+                                  "WHERE history.chat_id=%1 "
+                                  "AND history.id < %2;")
+                              .arg(chatId)
+                              .arg(lastDeliveredHistoryId);
     };
     // note this doesn't modify the db, just generate new queries, so is safe
     // to run outside of our upgrade transaction
@@ -150,10 +149,9 @@ bool dbSchema1to2(RawDatabase& db)
         return false;
     }
 
-    upgradeQueries += QString(
-        "DELETE FROM faux_offline_pending "
-        "WHERE id in ("
-            "SELECT id FROM broken_messages);");
+    upgradeQueries += QString("DELETE FROM faux_offline_pending "
+                              "WHERE id in ("
+                              "SELECT id FROM broken_messages);");
 
     upgradeQueries += RawDatabase::Query(QStringLiteral("PRAGMA user_version = 2;"));
 
@@ -172,16 +170,15 @@ bool dbSchema2to3(RawDatabase& db)
 
     QVector<RawDatabase::Query> upgradeQueries;
     upgradeQueries += RawDatabase::Query{QString("INSERT INTO broken_messages "
-            "SELECT faux_offline_pending.id FROM "
-            "history JOIN faux_offline_pending "
-            "ON faux_offline_pending.id = history.id "
-            "WHERE history.message = ?;"),
-            {emptyActionMessageString.toUtf8()}};
+                                                 "SELECT faux_offline_pending.id FROM "
+                                                 "history JOIN faux_offline_pending "
+                                                 "ON faux_offline_pending.id = history.id "
+                                                 "WHERE history.message = ?;"),
+                                         {emptyActionMessageString.toUtf8()}};
 
-    upgradeQueries += QString(
-        "DELETE FROM faux_offline_pending "
-        "WHERE id in ("
-            "SELECT id FROM broken_messages);");
+    upgradeQueries += QString("DELETE FROM faux_offline_pending "
+                              "WHERE id in ("
+                              "SELECT id FROM broken_messages);");
 
     upgradeQueries += RawDatabase::Query(QStringLiteral("PRAGMA user_version = 3;"));
 
@@ -277,14 +274,48 @@ bool dbSchema4to5(RawDatabase& db)
     return transactionPass;
 }
 
+bool dbSchema5to6(RawDatabase& db)
+{
+    QVector<RawDatabase::Query> upgradeQueries;
+
+    upgradeQueries += RawDatabase::Query{QString("ALTER TABLE faux_offline_pending "
+                                                 "ADD COLUMN required_extensions INTEGER NOT NULL "
+                                                 "DEFAULT 0;")};
+
+    upgradeQueries += RawDatabase::Query{QString("ALTER TABLE broken_messages "
+                                                 "ADD COLUMN reason INTEGER NOT NULL "
+                                                 "DEFAULT 0;")};
+
+    upgradeQueries += RawDatabase::Query(QStringLiteral("PRAGMA user_version = 6;"));
+    return db.execNow(upgradeQueries);
+}
+
 /**
-* @brief Upgrade the db schema
-* @return True if the schema upgrade succeded, false otherwise
-* @note On future alterations of the database all you have to do is bump the SCHEMA_VERSION
-* variable and add another case to the switch statement below. Make sure to fall through on each case.
-*/
+ * @brief Upgrade the db schema
+ * @note On future alterations of the database all you have to do is bump the SCHEMA_VERSION
+ * variable and add another case to the switch statement below. Make sure to fall through on each case.
+ */
 bool dbSchemaUpgrade(std::shared_ptr<RawDatabase>& db)
 {
+    // If we're a new dB we can just make a new one and call it a day
+    bool success = false;
+    const bool newDb = isNewDb(db, success);
+    if (!success) {
+        qCritical() << "Failed to create current db schema";
+        return false;
+    }
+
+    if (newDb) {
+        if (!createCurrentSchema(*db)) {
+            qCritical() << "Failed to create current db schema";
+            return false;
+        }
+        qDebug() << "Database created at schema version" << SCHEMA_VERSION;
+        return true;
+    }
+
+    // Otherwise we have to do upgrades from our current version to the latest version
+
     int64_t databaseSchemaVersion;
 
     if (!db->execNow(RawDatabase::Query("PRAGMA user_version", [&](const QVector<QVariant>& row) {
@@ -295,8 +326,9 @@ bool dbSchemaUpgrade(std::shared_ptr<RawDatabase>& db)
     }
 
     if (databaseSchemaVersion > SCHEMA_VERSION) {
-        qWarning().nospace() << "Database version (" << databaseSchemaVersion <<
-            ") is newer than we currently support (" << SCHEMA_VERSION << "). Please upgrade qTox";
+        qWarning().nospace() << "Database version (" << databaseSchemaVersion
+                             << ") is newer than we currently support (" << SCHEMA_VERSION
+                             << "). Please upgrade qTox";
         // We don't know what future versions have done, we have to disable db access until we re-upgrade
         return false;
     } else if (databaseSchemaVersion == SCHEMA_VERSION) {
@@ -304,66 +336,24 @@ bool dbSchemaUpgrade(std::shared_ptr<RawDatabase>& db)
         return true;
     }
 
-    switch (databaseSchemaVersion) {
-    case 0: {
-        // Note: 0 is a special version that is actually two versions.
-        //   possibility 1) it is a newly created database and it neesds the current schema to be created.
-        //   possibility 2) it is a old existing database, before version 1 and before we saved schema version,
-        //       and needs to be updated.
-        bool success = false;
-        const bool newDb = isNewDb(db, success);
-        if (!success) {
-            qCritical() << "Failed to create current db schema";
+    using DbSchemaUpgradeFn = bool (*)(RawDatabase&);
+    std::vector<DbSchemaUpgradeFn> upgradeFns = {dbSchema0to1, dbSchema1to2, dbSchema2to3,
+                                                 dbSchema3to4, dbSchema4to5, dbSchema5to6};
+
+    assert(databaseSchemaVersion < static_cast<int>(upgradeFns.size()));
+    assert(upgradeFns.size() == SCHEMA_VERSION);
+
+    for (int64_t i = databaseSchemaVersion; i < static_cast<int>(upgradeFns.size()); ++i) {
+        auto const newDbVersion = i + 1;
+        if (!upgradeFns[i](*db)) {
+            qCritical() << "Failed to upgrade db to schema version " << newDbVersion << " aborting";
             return false;
         }
-        if (newDb) {
-            if (!createCurrentSchema(*db)) {
-                qCritical() << "Failed to create current db schema";
-                return false;
-            }
-            qDebug() << "Database created at schema version" << SCHEMA_VERSION;
-            break; // new db is the only case where we don't incrementally upgrade through each version
-        } else {
-            if (!dbSchema0to1(*db)) {
-                qCritical() << "Failed to upgrade db to schema version 1, aborting";
-                return false;
-            }
-            qDebug() << "Database upgraded incrementally to schema version 1";
-        }
-    }
-        // fallthrough
-    case 1:
-       if (!dbSchema1to2(*db)) {
-            qCritical() << "Failed to upgrade db to schema version 2, aborting";
-            return false;
-       }
-       qDebug() << "Database upgraded incrementally to schema version 2";
-       //fallthrough
-    case 2:
-       if (!dbSchema2to3(*db)) {
-            qCritical() << "Failed to upgrade db to schema version 3, aborting";
-            return false;
-       }
-       qDebug() << "Database upgraded incrementally to schema version 3";
-    case 3:
-       if (!dbSchema3to4(*db)) {
-            qCritical() << "Failed to upgrade db to schema version 4, aborting";
-            return false;
-       }
-       qDebug() << "Database upgraded incrementally to schema version 4";
-       //fallthrough
-    case 4:
-       if (!dbSchema4to5(*db)) {
-            qCritical() << "Failed to upgrade db to schema version 5, aborting";
-            return false;
-       }
-       qDebug() << "Database upgraded incrementally to schema version 5";
-    // etc.
-    default:
-        qInfo() << "Database upgrade finished (databaseSchemaVersion" << databaseSchemaVersion
-                << "->" << SCHEMA_VERSION << ")";
+        qDebug() << "Database upgraded incrementally to schema version " << newDbVersion;
     }
 
+    qInfo() << "Database upgrade finished (databaseSchemaVersion" << databaseSchemaVersion << "->"
+            << SCHEMA_VERSION << ")";
     return true;
 }
 
@@ -371,6 +361,7 @@ MessageState getMessageState(bool isPending, bool isBroken)
 {
     assert(!(isPending && isBroken));
     MessageState messageState;
+
     if (isPending) {
         messageState = MessageState::pending;
     } else if (isBroken) {
@@ -379,6 +370,25 @@ MessageState getMessageState(bool isPending, bool isBroken)
         messageState = MessageState::complete;
     }
     return messageState;
+}
+
+QString generatePeerIdString(ToxPk const& pk)
+{
+    return QString("(SELECT id FROM peers WHERE public_key = '%1')").arg(pk.toString());
+
+}
+
+RawDatabase::Query generateEnsurePkInPeers(ToxPk const& pk)
+{
+    return RawDatabase::Query{QStringLiteral("INSERT OR IGNORE INTO peers (public_key) "
+                                "VALUES ('%1')").arg(pk.toString())};
+}
+
+RawDatabase::Query generateUpdateAlias(ToxPk const& pk, QString const& dispName)
+{
+    return RawDatabase::Query(
+            QString("INSERT OR IGNORE INTO aliases (owner, display_name) VALUES (%1, ?);").arg(generatePeerIdString(pk)),
+            {dispName.toUtf8()});
 }
 } // namespace
 
@@ -424,15 +434,6 @@ History::History(std::shared_ptr<RawDatabase> db_)
 
     connect(this, &History::fileInsertionReady, this, &History::onFileInsertionReady);
     connect(this, &History::fileInserted, this, &History::onFileInserted);
-
-    // Cache our current peers
-    db->execLater(RawDatabase::Query{"SELECT public_key, id FROM peers;",
-                                     [this](const QVector<QVariant>& row) {
-                                         // HACK: we previously accidentally put Tox IDs in the db. So instead of
-                                         // constructing as a ToxPk which will enforce the correct length, construct
-                                         // as ToxId which will allow either length, and then convert to ToxPk.
-                                         peers[ToxId{QByteArray::fromHex(row[0].toByteArray())}.getPublicKey()] = row[1].toInt();
-                                     }});
 }
 
 History::~History()
@@ -497,12 +498,6 @@ void History::removeFriendHistory(const ToxPk& friendPk)
         return;
     }
 
-    if (!peers.contains(friendPk)) {
-        return;
-    }
-
-    int64_t id = peers[friendPk];
-
     QString queryText = QString("DELETE FROM faux_offline_pending "
                                 "WHERE faux_offline_pending.id IN ( "
                                 "    SELECT faux_offline_pending.id FROM faux_offline_pending "
@@ -520,11 +515,9 @@ void History::removeFriendHistory(const ToxPk& friendPk)
                                 "DELETE FROM peers WHERE id=%1; "
                                 "DELETE FROM file_transfers WHERE chat_id=%1;"
                                 "VACUUM;")
-                            .arg(id);
+                            .arg(generatePeerIdString(friendPk));
 
-    if (db->execNow(queryText)) {
-        peers.remove(friendPk);
-    } else {
+    if (!db->execNow(queryText)) {
         qWarning() << "Failed to remove friend's history";
     }
 }
@@ -542,70 +535,32 @@ void History::removeFriendHistory(const ToxPk& friendPk)
 QVector<RawDatabase::Query>
 History::generateNewMessageQueries(const ToxPk& friendPk, const QString& message,
                                    const ToxPk& sender, const QDateTime& time, bool isDelivered,
-                                   QString dispName, std::function<void(RowId)> insertIdCallback)
+                                   ExtensionSet extensionSet, QString dispName,
+                                   std::function<void(RowId)> insertIdCallback)
 {
     QVector<RawDatabase::Query> queries;
 
-    // Get the db id of the peer we're chatting with
-    int64_t peerId;
-    if (peers.contains(friendPk)) {
-        peerId = (peers)[friendPk];
-    } else {
-        if (peers.isEmpty()) {
-            peerId = 0;
-        } else {
-            peerId = *std::max_element(peers.begin(), peers.end()) + 1;
-        }
 
-        (peers)[friendPk] = peerId;
-        queries += RawDatabase::Query(("INSERT INTO peers (id, public_key) "
-                                       "VALUES (%1, '"
-                                       + friendPk.toString() + "');")
-                                          .arg(peerId));
-    }
+    queries += generateEnsurePkInPeers(friendPk);
+    queries += generateEnsurePkInPeers(sender);
+    queries += generateUpdateAlias(sender, dispName);
 
-    // Get the db id of the sender of the message
-    int64_t senderId;
-    if (peers.contains(sender)) {
-        senderId = (peers)[sender];
-    } else {
-        if (peers.isEmpty()) {
-            senderId = 0;
-        } else {
-            senderId = *std::max_element(peers.begin(), peers.end()) + 1;
-        }
-
-        (peers)[sender] = senderId;
-        queries += RawDatabase::Query{("INSERT INTO peers (id, public_key) "
-                                       "VALUES (%1, '"
-                                       + sender.toString() + "');")
-                                          .arg(senderId)};
-    }
-
-    queries += RawDatabase::Query(
-        QString("INSERT OR IGNORE INTO aliases (owner, display_name) VALUES (%1, ?);").arg(senderId),
-        {dispName.toUtf8()});
-
-    // If the alias already existed, the insert will ignore the conflict and last_insert_rowid()
-    // will return garbage,
-    // so we have to check changes() and manually fetch the row ID in this case
     queries +=
         RawDatabase::Query(QString(
                                "INSERT INTO history (timestamp, chat_id, message, sender_alias) "
                                "VALUES (%1, %2, ?, ("
-                               "  CASE WHEN changes() IS 0 THEN ("
                                "    SELECT id FROM aliases WHERE owner=%3 AND display_name=?)"
-                               "  ELSE last_insert_rowid() END"
-                               "));")
+                               ");")
                                .arg(time.toMSecsSinceEpoch())
-                               .arg(peerId)
-                               .arg(senderId),
+                               .arg(generatePeerIdString(friendPk))
+                               .arg(generatePeerIdString(sender)),
                            {message.toUtf8(), dispName.toUtf8()}, insertIdCallback);
 
     if (!isDelivered) {
-        queries += RawDatabase::Query{"INSERT INTO faux_offline_pending (id) VALUES ("
-                                      "    last_insert_rowid()"
-                                      ");"};
+        queries += RawDatabase::Query{QString("INSERT INTO faux_offline_pending (id, required_extensions) VALUES ("
+                                              "    last_insert_rowid(), %1"
+                                              ");")
+                                          .arg(extensionSet.to_ulong())};
     }
 
     return queries;
@@ -617,8 +572,6 @@ void History::onFileInsertionReady(FileDbInsertionData data)
     QVector<RawDatabase::Query> queries;
     std::weak_ptr<History> weakThis = shared_from_this();
 
-    // peerId is guaranteed to be inserted since we just used it in addNewMessage
-    auto peerId = peers[data.friendPk];
     // Copy to pass into labmda for later
     auto fileId = data.fileId;
     queries +=
@@ -626,11 +579,12 @@ void History::onFileInsertionReady(FileDbInsertionData data)
                                "INSERT INTO file_transfers (chat_id, file_restart_id, "
                                "file_path, file_name, file_hash, file_size, direction, file_state) "
                                "VALUES (%1, ?, ?, ?, ?, %2, %3, %4);")
-                               .arg(peerId)
+                               .arg(generatePeerIdString(data.friendPk))
                                .arg(data.size)
                                .arg(static_cast<int>(data.direction))
                                .arg(ToxFile::CANCELED),
-                           {data.fileId.toUtf8(), data.filePath.toUtf8(), data.fileName.toUtf8(), QByteArray()},
+                           {data.fileId.toUtf8(), data.filePath.toUtf8(), data.fileName.toUtf8(),
+                            QByteArray()},
                            [weakThis, fileId](RowId id) {
                                auto pThis = weakThis.lock();
                                if (pThis) {
@@ -727,7 +681,7 @@ void History::addNewFileMessage(const ToxPk& friendPk, const QString& fileId,
             emit thisPtr->fileInsertionReady(std::move(insertionDataRw));
     };
 
-    addNewMessage(friendPk, "", sender, time, true, dispName, insertFileTransferFn);
+    addNewMessage(friendPk, "", sender, time, true, ExtensionSet(), dispName, insertFileTransferFn);
 }
 
 /**
@@ -741,15 +695,15 @@ void History::addNewFileMessage(const ToxPk& friendPk, const QString& fileId,
  * @param insertIdCallback Function, called after query execution.
  */
 void History::addNewMessage(const ToxPk& friendPk, const QString& message, const ToxPk& sender,
-                            const QDateTime& time, bool isDelivered, QString dispName,
-                            const std::function<void(RowId)>& insertIdCallback)
+                            const QDateTime& time, bool isDelivered, ExtensionSet extensionSet,
+                            QString dispName, const std::function<void(RowId)>& insertIdCallback)
 {
     if (historyAccessBlocked()) {
         return;
     }
 
-    db->execLater(generateNewMessageQueries(friendPk, message, sender, time, isDelivered, dispName,
-                                            insertIdCallback));
+    db->execLater(generateNewMessageQueries(friendPk, message, sender, time, isDelivered,
+                                            extensionSet, dispName, insertIdCallback));
 }
 
 void History::setFileFinished(const QString& fileId, bool success, const QString& filePath,
@@ -825,7 +779,8 @@ QList<History::HistMessage> History::getMessagesForFriend(const ToxPk& friendPk,
                 "message, file_transfers.file_restart_id, "
                 "file_transfers.file_path, file_transfers.file_name, "
                 "file_transfers.file_size, file_transfers.direction, "
-                "file_transfers.file_state, broken_messages.id FROM history "
+                "file_transfers.file_state, broken_messages.id, "
+                "faux_offline_pending.required_extensions FROM history "
                 "LEFT JOIN faux_offline_pending ON history.id = faux_offline_pending.id "
                 "JOIN peers chat ON history.chat_id = chat.id "
                 "JOIN aliases ON sender_alias = aliases.id "
@@ -848,12 +803,13 @@ QList<History::HistMessage> History::getMessagesForFriend(const ToxPk& friendPk,
         auto display_name = QString::fromUtf8(row[4].toByteArray().replace('\0', ""));
         auto sender_key = row[5].toString();
         auto isBroken = !row[13].isNull();
+        auto requiredExtensions = ExtensionSet(row[14].toLongLong());
 
         MessageState messageState = getMessageState(isPending, isBroken);
 
         if (row[7].isNull()) {
-            messages += {id, messageState, timestamp, friend_key,
-                         display_name, sender_key, row[6].toString()};
+            messages += {id,           messageState, requiredExtensions, timestamp,        friend_key,
+                         display_name, sender_key,   row[6].toString()};
         } else {
             ToxFile file;
             file.fileKind = TOX_FILE_KIND_DATA;
@@ -863,8 +819,7 @@ QList<History::HistMessage> History::getMessagesForFriend(const ToxPk& friendPk,
             file.filesize = row[10].toLongLong();
             file.direction = static_cast<ToxFile::FileDirection>(row[11].toLongLong());
             file.status = static_cast<ToxFile::FileStatus>(row[12].toInt());
-            messages +=
-                {id, messageState, timestamp, friend_key, display_name, sender_key, file};
+            messages += {id, messageState, timestamp, friend_key, display_name, sender_key, file};
         }
     };
 
@@ -881,7 +836,8 @@ QList<History::HistMessage> History::getUndeliveredMessagesForFriend(const ToxPk
 
     auto queryText =
         QString("SELECT history.id, faux_offline_pending.id, timestamp, chat.public_key, "
-                "aliases.display_name, sender.public_key, message, broken_messages.id "
+                "aliases.display_name, sender.public_key, message, broken_messages.id, "
+                "faux_offline_pending.required_extensions "
                 "FROM history "
                 "JOIN faux_offline_pending ON history.id = faux_offline_pending.id "
                 "JOIN peers chat on history.chat_id = chat.id "
@@ -902,11 +858,12 @@ QList<History::HistMessage> History::getUndeliveredMessagesForFriend(const ToxPk
         auto display_name = QString::fromUtf8(row[4].toByteArray().replace('\0', ""));
         auto sender_key = row[5].toString();
         auto isBroken = !row[7].isNull();
+        auto extensionSet = ExtensionSet(row[8].toLongLong());
 
         MessageState messageState = getMessageState(isPending, isBroken);
 
-        ret += {id, messageState, timestamp, friend_key,
-                display_name, sender_key, row[6].toString()};
+        ret +=
+            {id, messageState, extensionSet, timestamp, friend_key, display_name, sender_key, row[6].toString()};
     };
 
     db->execNow({queryText, rowCallback});
@@ -1106,5 +1063,20 @@ bool History::historyAccessBlocked()
     }
 
     return false;
+}
 
+void History::markAsBroken(RowId messageId, BrokenMessageReason reason)
+{
+    if (!isValid()) {
+        return;
+    }
+
+    QVector<RawDatabase::Query> queries;
+    queries += RawDatabase::Query(QString("DELETE FROM faux_offline_pending WHERE id=%1;").arg(messageId.get()));
+    queries += RawDatabase::Query(QString("INSERT INTO broken_messages (id, reason) "
+                                          "VALUES (%1, %2);")
+                                          .arg(messageId.get())
+                                          .arg(static_cast<int64_t>(reason)));
+
+    db->execLater(queries);
 }

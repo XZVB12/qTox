@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE TS>
-<TS version="2.0" language="nb_NO">
+<TS version="2.1" language="nb_NO">
 <context>
     <name>AVForm</name>
     <message>
@@ -36,10 +36,6 @@
         <translation>Avspillingsenhet</translation>
     </message>
     <message>
-        <source>Use slider to set volume of your speakers.</source>
-        <translation>Bruk glidebryteren for å sette lydstyrken på høytalerne dine.</translation>
-    </message>
-    <message>
         <source>Capture device</source>
         <translation>Opptaksenhet</translation>
     </message>
@@ -64,7 +60,8 @@ which may lead to problems with video calls.</source>
         <translation>Sett oppløsningen for ditt kamera.
 Høyere verdier øker sjansen for at dine venner får bedre videokvalitet.
 NB! Høyere videokvalitet krever raskere internett-tilkobling.
-Det kan oppstå problemer med videosamtalene hvis du har valgt høyere videokvalitet enn hva din internett-tilkoblingen klarer å levere.</translation>
+Det kan oppstå problemer med videosamtalene hvis du har valgt høyere
+videokvalitet enn det din internett-tilkobling klarer å levere.</translation>
     </message>
     <message>
         <source>Resolution</source>
@@ -79,20 +76,8 @@ Det kan oppstå problemer med videosamtalene hvis du har valgt høyere videokval
         <translation>Testlyd</translation>
     </message>
     <message>
-        <source>Enables the experimental audio backend with echo cancelling support, needs qTox restart to take effect.</source>
-        <translation>Skrur på eksperimentell lyd-bakende med ekkokanselleringsstøtte. qTox må startes på nytt for at dette skal tre i effekt.</translation>
-    </message>
-    <message>
-        <source>Enable experimental audio backend</source>
-        <translation>Skru på eksperimentell lyd-bakende</translation>
-    </message>
-    <message>
         <source>Audio quality</source>
         <translation>Lydkvalitet</translation>
-    </message>
-    <message>
-        <source>Transmitted audio quality. Lower this setting if your bandwidth is not high enough or if you want to lower the internet usage.</source>
-        <translation>Sendt lydkvalitet. Senk denne hvis din båndbredde ikke er høy nok, eller hvis du ønsker å senke databruken.</translation>
     </message>
     <message>
         <source>High (64 kbps)</source>
@@ -113,6 +98,34 @@ Det kan oppstå problemer med videosamtalene hvis du har valgt høyere videokval
     <message>
         <source>Threshold</source>
         <translation>Terskel</translation>
+    </message>
+    <message>
+        <source>Use slider to set the volume of your speakers.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Transmitted audio quality. Lower this setting if your bandwidth is not high enough or if you want to reduce bandwidth usage.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Set resolution of your camera.
+The higher values, the better video quality your friends may get.
+Note that with better video quality, you use more bandwidth.
+Sometimes your connection may not be good enough to handle higher video quality,
+which may lead to problems with video calls.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Play a test sound while changing the output volume.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Use slider to set the gain of your input device ranging from %1dB to %2dB.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Use slider to set the activation volume for your input device.</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -158,18 +171,18 @@ Det kan oppstå problemer med videosamtalene hvis du har valgt høyere videokval
     </message>
     <message>
         <source>bug-tracker</source>
-        <comment>Replaces `%1` in the `A list of all knownâ¦`</comment>
-        <translation>feilrapporteringsside</translation>
+        <comment>Replaces `%1` in the `A list of all known…`</comment>
+        <translation type="unfinished">feilrapporteringsside</translation>
     </message>
     <message>
         <source>Writing Useful Bug Reports</source>
-        <comment>Replaces `%2` in the `A list of all knownâ¦`</comment>
-        <translation>Hvordan skrive nyttige feilrapporter</translation>
+        <comment>Replaces `%2` in the `A list of all known…`</comment>
+        <translation type="unfinished">Hvordan skrive nyttige feilrapporter</translation>
     </message>
     <message>
         <source>contributors</source>
-        <comment>Replaces `%1` in `See a full list ofâ¦`</comment>
-        <translation>bidragsytere</translation>
+        <comment>Replaces `%1` in `See a full list of…`</comment>
+        <translation type="unfinished">bidragsytere</translation>
     </message>
 </context>
 <context>
@@ -199,20 +212,8 @@ Det kan oppstå problemer med videosamtalene hvis du har valgt høyere videokval
         <translation>Automatisk godta filer fra kontakt hvis valgt</translation>
     </message>
     <message>
-        <source>Auto accept files</source>
-        <translation>Godta filer automatisk</translation>
-    </message>
-    <message>
         <source>Default directory to save files:</source>
         <translation>Standard mappe for fillagring:</translation>
-    </message>
-    <message>
-        <source>Auto accept for this contact is disabled</source>
-        <translation>Automatisk filgodkjenning for denne kontakten er deaktivert</translation>
-    </message>
-    <message>
-        <source>Auto accept call:</source>
-        <translation>Svar på samtale automatisk:</translation>
     </message>
     <message>
         <source>Manual</source>
@@ -231,10 +232,6 @@ Det kan oppstå problemer med videosamtalene hvis du har valgt høyere videokval
         <translation>Godta gruppesamtaleinvitasjoner fra denne kontakten automatisk hvis valgt.</translation>
     </message>
     <message>
-        <source>Auto accept group invites</source>
-        <translation>Godta gruppeinvitasjoner automatisk</translation>
-    </message>
-    <message>
         <source>Remove history (operation can not be undone!)</source>
         <translation>Fjern historikk (kan ikke omgjøres!)</translation>
     </message>
@@ -247,29 +244,20 @@ Det kan oppstå problemer med videosamtalene hvis du har valgt høyere videokval
         <translation>Inndatafelt for notiser om denne kontakten</translation>
     </message>
     <message>
-        <source>You can save comment about this contact here.</source>
-        <translation>Du kan lagre en kommentar om denne brukeren her.</translation>
-    </message>
-    <message>
         <source>History removed</source>
         <translation>Historikk fjernet</translation>
     </message>
     <message>
-        <source>Choose an auto accept directory</source>
-        <extracomment>popup title</extracomment>
-        <translation>Velg en filsti for auto-aksepterte filer</translation>
-    </message>
-    <message>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;This is the public key of your friend, use it to verify their identity via another channel. You can not send this to other people so they can add this contact.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="unfinished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Dette er den offentlige nøkkelen tilhørende din venn, bruk den til å bekrefte identiteten via en annen kanal. Du kan ikke sende dette til andre folk slik at de kan legge til denne kontakten.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Dette er den offentlige nøkkelen til din venn, bruk den til å bekrefte identiteten deres via en annen kanal. Du kan ikke sende dette til andre folk slik at de kan legge til denne kontakten.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
         <source>Public key (not ToxID):</source>
-        <translation type="unfinished">Offentlig nøkel (ikke Tox ID):</translation>
+        <translation>Offentlig nøkkel (ikke Tox-ID):</translation>
     </message>
     <message>
         <source>Confirmation</source>
-        <translation type="unfinished">Bekreftelse</translation>
+        <translation>Bekreftelse</translation>
     </message>
     <message>
         <source>Are you sure to remove %1 chat history?</source>
@@ -277,7 +265,32 @@ Det kan oppstå problemer med videosamtalene hvis du har valgt høyere videokval
     </message>
     <message>
         <source>Failed to remove chat history with %1!</source>
-        <translation type="unfinished">Klarte ikke å fjerne sludrehistorikk med %1.</translation>
+        <translation>Klarte ikke fjerne sludrehistorikk med %1!</translation>
+    </message>
+    <message>
+        <source>Auto-accept files</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Auto-accept for this contact is disabled</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Auto-accept call:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Auto-accept group invites</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>You can save comments about this contact here.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Choose an auto-accept directory</source>
+        <extracomment>popup title</extracomment>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -300,15 +313,19 @@ Det kan oppstå problemer med videosamtalene hvis du har valgt høyere videokval
     </message>
     <message>
         <source>Open update download link</source>
-        <translation type="unfinished">Åpne oppdateringsnedlastingslenke</translation>
+        <translation>Åpne nedlastingslenke for oppdatering</translation>
     </message>
     <message>
         <source>Update available</source>
-        <translation type="unfinished">Oppgradering tilgjengelig</translation>
+        <translation>Oppdatering tilgjengelig</translation>
     </message>
-    <message utf8="true">
+    <message>
         <source>qTox is up to date ✓</source>
-        <translation type="unfinished">qTox er av nyeste dato ✓</translation>
+        <translation>qTox er oppdatert ✓</translation>
+    </message>
+    <message>
+        <source>Currently running an untested/unstable version of qTox</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -346,10 +363,6 @@ Det kan oppstå problemer med videosamtalene hvis du har valgt høyere videokval
         <translation>Avvis</translation>
     </message>
     <message>
-        <source>Tox ID, either 76 hexadecimal characters or name@example.com</source>
-        <translation>Tox ID, enten 76 heksadesimale tegn eller navn@eksempel.no</translation>
-    </message>
-    <message>
         <source>Type in Tox ID of your friend</source>
         <translation>Skriv inn Tox-ID tilhørende din venn</translation>
     </message>
@@ -360,11 +373,6 @@ Det kan oppstå problemer med videosamtalene hvis du har valgt høyere videokval
     <message>
         <source>Type message to send with the friend request or leave empty to send a default message</source>
         <translation>Skriv melding for å legge ved venneforespørselen, eller la stå tom for å sende forvalgt melding</translation>
-    </message>
-    <message>
-        <source>%1 Tox ID is invalid or does not exist</source>
-        <comment>Toxme error</comment>
-        <translation>%1 Tox ID er ugyldig eller så finnes den ikke</translation>
     </message>
     <message>
         <source>You can&apos;t add yourself as a friend!</source>
@@ -398,11 +406,6 @@ Det kan oppstå problemer med videosamtalene hvis du har valgt høyere videokval
         <translation>Tox-ID</translation>
     </message>
     <message>
-        <source>either 76 hexadecimal characters or name@example.com</source>
-        <extracomment>Tox ID format description</extracomment>
-        <translation>enten 76 heksadesimale tegn eller navn@eksempel.no</translation>
-    </message>
-    <message>
         <source>Message</source>
         <extracomment>The message you send in friend requests</extracomment>
         <translation>Melding</translation>
@@ -427,7 +430,6 @@ Det kan oppstå problemer med videosamtalene hvis du har valgt høyere videokval
     </message>
     <message numerus="yes">
         <source>Ready to import %n contact(s), click send to confirm</source>
-        <extracomment>Shows the number of contacts we&apos;re about to import from a file (at least one)</extracomment>
         <translation>
             <numerusform>Klar til å importere %n kontakt, klikk send for å bekrefte</numerusform>
             <numerusform>Klar til å importere %n kontakter, klikk send for å bekrefte</numerusform>
@@ -437,16 +439,26 @@ Det kan oppstå problemer med videosamtalene hvis du har valgt høyere videokval
         <source>Import contacts</source>
         <translation>Importer kontakter</translation>
     </message>
+    <message>
+        <source>Tox ID, 76 hexadecimal characters</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>%1 Tox ID is invalid</source>
+        <comment>Tox address error</comment>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>76 hexadecimal characters</source>
+        <extracomment>Tox ID format description</extracomment>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>AdvancedForm</name>
     <message>
         <source>Advanced</source>
         <translation>Avansert</translation>
-    </message>
-    <message>
-        <source>Unless you %1 know what you are doing, please do %2 change anything here. Changes made here may lead to problems with qTox, and even to loss of your data, e.g. history.</source>
-        <translation>Med mindre du %1 vet hva du gjør, %2 gjør endringer her. Endringer gjort her kan føre til problemer med qTox, og selv datatap, f.eks. historikk.</translation>
     </message>
     <message>
         <source>really</source>
@@ -477,22 +489,20 @@ Det kan oppstå problemer med videosamtalene hvis du har valgt høyere videokval
         <translation>Nei</translation>
     </message>
     <message>
-        <source>Call active</source>
-        <comment>popup title</comment>
-        <translation>Pågående samtale</translation>
-    </message>
-    <message>
-        <source>You can&apos;t disconnect while a call is active!</source>
-        <comment>popup text</comment>
-        <translation>Du kan ikke koble fra mens en samtale pågår!</translation>
-    </message>
-    <message>
-        <source>Save File</source>
-        <translation>Lagre fil</translation>
-    </message>
-    <message>
         <source>Logs (*.log)</source>
         <translation>Loggføring (*.log)</translation>
+    </message>
+    <message>
+        <source>Unless you %1 know what you are doing, please do %2 change anything here. Changes made here may lead to problems with qTox, and even to loss of your data, e.g. history.%3</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Changes here are applied only after restarting qTox.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Save file</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -501,7 +511,7 @@ Det kan oppstå problemer med videosamtalene hvis du har valgt høyere videokval
         <source>Save settings to the working directory instead of the usual conf dir</source>
         <extracomment>describes makeToxPortable checkbox</extracomment>
         <translatorcomment>beskriver gjørToxBærbar avkrysningsboks</translatorcomment>
-        <translation>Lagre instillinger til arbeidsmappen i stedet for den vanlige konfigurasjonsmappen</translation>
+        <translation>Lagre innstillinger til arbeidsmappen istedenfor den vanlige oppsettsmappen</translation>
     </message>
     <message>
         <source>Make Tox portable</source>
@@ -509,25 +519,16 @@ Det kan oppstå problemer med videosamtalene hvis du har valgt høyere videokval
     </message>
     <message>
         <source>Reset to default settings</source>
-        <translation>Reset til standardinstillinger</translation>
+        <translation>Tilbakestill til forvalgte innstillinger</translation>
     </message>
     <message>
         <source>Portable</source>
         <translation>Bærbar</translation>
     </message>
     <message>
-        <source>Connection Settings</source>
-        <translation>Tilkoblingsinnstillinger</translation>
-    </message>
-    <message>
         <source>Enable IPv6 (recommended)</source>
         <extracomment>Text on a checkbox to enable IPv6</extracomment>
         <translation>Skru på IPv6 (anbefalt)</translation>
-    </message>
-    <message>
-        <source>Disabling this allows, e.g., toxing over Tor. It adds load to the Tox network however, so uncheck only when necessary.</source>
-        <extracomment>force tcp checkbox tooltip</extracomment>
-        <translation>Å skru av dette av tillater f.eks. toxing over Tor. Det legger derimot en last på Tox-nettverket, så bare skru det på når dette når er nødvendig.</translation>
     </message>
     <message>
         <source>Enable UDP (recommended)</source>
@@ -561,11 +562,6 @@ Det kan oppstå problemer med videosamtalene hvis du har valgt høyere videokval
         <translation>HTTP</translation>
     </message>
     <message>
-        <source>Reconnect</source>
-        <comment>reconnect button</comment>
-        <translation>Koble til igjen</translation>
-    </message>
-    <message>
         <source>Debug</source>
         <translation>Feilrett</translation>
     </message>
@@ -579,7 +575,16 @@ Det kan oppstå problemer med videosamtalene hvis du har valgt høyere videokval
     </message>
     <message>
         <source>Enable LAN discovery</source>
-        <translation type="unfinished">Skru på LAN-oppdagelse</translation>
+        <translation>Skru på LAN-oppdagelse</translation>
+    </message>
+    <message>
+        <source>Connection settings</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Disabling this allows, e.g., Tox over Tor. It adds load to the Tox network however, so uncheck only when necessary.</source>
+        <extracomment>force tcp checkbox tooltip</extracomment>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -627,10 +632,6 @@ Det kan oppstå problemer med videosamtalene hvis du har valgt høyere videokval
         <translation>Ringer %1</translation>
     </message>
     <message>
-        <source>%1 is typing</source>
-        <translation>%1 skriver</translation>
-    </message>
-    <message>
         <source>Copy</source>
         <translation>Kopier</translation>
     </message>
@@ -653,9 +654,8 @@ Det kan oppstå problemer med videosamtalene hvis du har valgt høyere videokval
     </message>
     <message>
         <source>Illegal characters have been changed to _ 
-so you can save the file on windows.</source>
-        <translation>Ulovlige tegn har blitt endret til _ 
-slik at du kan lagre filen på Windows.</translation>
+so you can save the file on Windows.</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -739,6 +739,10 @@ slik at du kan lagre filen på Windows.</translation>
         <source>pending</source>
         <translation>i påvente</translation>
     </message>
+    <message>
+        <source>%1 is typing</source>
+        <translation type="unfinished">%1 skriver</translation>
+    </message>
 </context>
 <context>
     <name>ChatTextEdit</name>
@@ -771,51 +775,47 @@ slik at du kan lagre filen på Windows.</translation>
         <translation>/me tilbyr vennskap, &quot;%1&quot;</translation>
     </message>
     <message>
-        <source>Invalid Tox ID</source>
-        <comment>Error while sending friendship request</comment>
-        <translation>Ugyldig Tox-ID</translation>
-    </message>
-    <message>
-        <source>You need to write a message with your request</source>
-        <comment>Error while sending friendship request</comment>
-        <translation>Du må legge en melding ved din forespørsel</translation>
-    </message>
-    <message>
-        <source>Your message is too long!</source>
-        <comment>Error while sending friendship request</comment>
-        <translation>Din melding er for lang!</translation>
-    </message>
-    <message>
-        <source>Friend is already added</source>
-        <comment>Error while sending friendship request</comment>
-        <translation>Kontakt allerede lagt til</translation>
-    </message>
-    <message>
         <source>Groupchat %1</source>
         <translation>Gruppesludring %1</translation>
     </message>
+    <message>
+        <source>Invalid Tox ID</source>
+        <comment>Error while sending friend request</comment>
+        <translation type="unfinished">Ugyldig Tox-ID</translation>
+    </message>
+    <message>
+        <source>You need to write a message with your request</source>
+        <comment>Error while sending friend request</comment>
+        <translation type="unfinished">Du må legge en melding ved din forespørsel</translation>
+    </message>
+    <message>
+        <source>Your message is too long!</source>
+        <comment>Error while sending friend request</comment>
+        <translation type="unfinished">Din melding er for lang!</translation>
+    </message>
+    <message>
+        <source>Friend is already added</source>
+        <comment>Error while sending friend request</comment>
+        <translation type="unfinished">Kontakt allerede lagt til</translation>
+    </message>
 </context>
 <context>
-    <name>DesktopNotify</name>
+    <name>ExtensionStatus</name>
     <message>
-        <source>New message</source>
-        <translation type="unfinished">Ny melding</translation>
+        <source>All extensions supported</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Incoming file transfer</source>
-        <translation>Innkommende filoverføring</translation>
+        <source>No extensions supported</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Friend request received</source>
-        <translation>Venneforespørsel mottatt</translation>
+        <source>Not all extensions supported</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>New group message</source>
-        <translation>Ny gruppemelding</translation>
-    </message>
-    <message>
-        <source>Group invite received</source>
-        <translation>Gruppeinvitasjon mottatt</translation>
+        <source>Multipart Messages: </source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -900,9 +900,9 @@ slik at du kan lagre filen på Windows.</translation>
         <translation>Åpne filsystem</translation>
     </message>
     <message>
-        <source>Remote Paused</source>
+        <source>Remote paused</source>
         <comment>file transfer widget</comment>
-        <translation type="unfinished">Annensteds fra pauset</translation>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -916,9 +916,9 @@ slik at du kan lagre filen på Windows.</translation>
         <translation>Opplastinger</translation>
     </message>
     <message>
-        <source>Transferred Files</source>
+        <source>Transferred files</source>
         <comment>&quot;Headline&quot; of the window</comment>
-        <translation>Overførte filer</translation>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -940,42 +940,12 @@ slik at du kan lagre filen på Windows.</translation>
         <translation>Denne måneden</translation>
     </message>
     <message>
-        <source>Older than 6 Months</source>
-        <translation>Eldre enn 6 måneder</translation>
-    </message>
-    <message>
         <source>Never</source>
         <translation>Aldri</translation>
     </message>
-</context>
-<context>
-    <name>FriendRequestDialog</name>
     <message>
-        <source>Friend request</source>
-        <comment>Title of the window to aceept/deny a friend request</comment>
-        <translation>Venneforespørsel</translation>
-    </message>
-    <message>
-        <source>Someone wants to make friends with you</source>
-        <translation>Noen vil være venn med deg</translation>
-    </message>
-    <message>
-        <source>User ID:</source>
-        <translation>Bruker-ID:</translation>
-    </message>
-    <message>
-        <source>Friend request message:</source>
-        <translation>Venneforespørselsmelding:</translation>
-    </message>
-    <message>
-        <source>Accept</source>
-        <comment>Accept a friend request</comment>
-        <translation>Aksepter</translation>
-    </message>
-    <message>
-        <source>Reject</source>
-        <comment>Reject a friend request</comment>
-        <translation>Avvis</translation>
+        <source>Older than 6 months</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -999,10 +969,6 @@ slik at du kan lagre filen på Windows.</translation>
         <translation>Fjern fra sirkel &quot;%1&quot;</translation>
     </message>
     <message>
-        <source>Move  to circle &quot;%1&quot;</source>
-        <translation>Flytt til sirkelen &quot;%1&quot;</translation>
-    </message>
-    <message>
         <source>Set alias...</source>
         <translation>Sett alias...</translation>
     </message>
@@ -1010,11 +976,6 @@ slik at du kan lagre filen på Windows.</translation>
         <source>Auto accept files from this friend</source>
         <comment>context menu entry</comment>
         <translation>Auto-aksepter filer fra denne kontakten</translation>
-    </message>
-    <message>
-        <source>Remove friend</source>
-        <comment>Menu to remove the friend from our friendlist</comment>
-        <translation>Fjern kontakt</translation>
     </message>
     <message>
         <source>Choose an auto accept directory</source>
@@ -1061,6 +1022,23 @@ slik at du kan lagre filen på Windows.</translation>
         <source>Show details</source>
         <translation>Vis detaljer</translation>
     </message>
+    <message>
+        <source>Move to circle &quot;%1&quot;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Remove friend</source>
+        <comment>Menu to remove the friend from the friend list</comment>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Blocked</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Negotiating</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>GeneralForm</name>
@@ -1078,7 +1056,7 @@ slik at du kan lagre filen på Windows.</translation>
     <name>GeneralSettings</name>
     <message>
         <source>General Settings</source>
-        <translation>Generelle Instillinger</translation>
+        <translation>Generelle innstillinger</translation>
     </message>
     <message>
         <source>The translation may not load until qTox restarts.</source>
@@ -1102,13 +1080,6 @@ slik at du kan lagre filen på Windows.</translation>
         <translation>Vis ikonet i statusfeltet</translation>
     </message>
     <message>
-        <source>After pressing close (X) qTox will minimize to tray,
-instead of closing itself.</source>
-        <comment>toolTip for close to tray setting</comment>
-        <translation>Etter å ha valgt å lukke programmet (X) vil qTox minimeres til statusfeltet,
-i stedet for å lukke seg selv.</translation>
-    </message>
-    <message>
         <source>Close to tray</source>
         <translation>Lukk til statusfeltet</translation>
     </message>
@@ -1120,12 +1091,6 @@ i stedet for å lukke seg selv.</translation>
     <message>
         <source>Light icon</source>
         <translation>Lyst ikon</translation>
-    </message>
-    <message>
-        <source>After pressing minimize (_) qTox will minimize itself to tray,
-instead of system taskbar.</source>
-        <comment>toolTip for minimize to tray setting</comment>
-        <translation>Etter å ha valg å minimere (_) vil qTox minimere seg til statusfeltet i stedet for til oppgavelinjen.</translation>
     </message>
     <message>
         <source>Minimize to tray</source>
@@ -1146,11 +1111,6 @@ instead of system taskbar.</source>
     <message>
         <source>Autostart</source>
         <translation>Autostart</translation>
-    </message>
-    <message>
-        <source>You can set this on a per-friend basis by right clicking them.</source>
-        <comment>autoaccept cb tooltip</comment>
-        <translation>Du kan velge dette på en per-kontakt-basis ved å høyreklikke på de.</translation>
     </message>
     <message>
         <source>Set where files will be saved.</source>
@@ -1174,19 +1134,36 @@ instead of system taskbar.</source>
     </message>
     <message>
         <source>Check for updates</source>
-        <translation type="unfinished">Se etter nye versjoner</translation>
+        <translation>Se etter oppdateringer</translation>
     </message>
     <message>
         <source>Spell checking</source>
-        <translation type="unfinished">Stavekontroll</translation>
+        <translation>Stavekontroll</translation>
     </message>
     <message>
         <source>Max autoaccept file size (0 to disable):</source>
-        <translation type="unfinished">Maksimal automatisk godkjente filstørrelse (0 for å skru av):</translation>
+        <translation>Maksimal automatisk akseptert filstørrelse (0 for å skru av):</translation>
     </message>
     <message>
         <source> MB</source>
         <translation> MB</translation>
+    </message>
+    <message>
+        <source>After pressing minimize (_) qTox will minimize to tray,
+instead of system taskbar.</source>
+        <comment>toolTip for minimize to tray setting</comment>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>After pressing close (X) qTox will close to tray,
+instead of closing entirely.</source>
+        <comment>toolTip for close to tray setting</comment>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>You can set this on a per-friend basis by right clicking individual friends.</source>
+        <comment>autoaccept cb tooltip</comment>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -1229,11 +1206,7 @@ instead of system taskbar.</source>
     </message>
     <message>
         <source>Confirmation</source>
-        <translation type="unfinished">Bekreftelse</translation>
-    </message>
-    <message>
-        <source>You are sure that you want to clear all displayed messages?</source>
-        <translation>Er du sikker på at du ønsker å tømme alle viste meldinger?</translation>
+        <translation>Bekreftelse</translation>
     </message>
     <message>
         <source>Search in text</source>
@@ -1245,50 +1218,15 @@ instead of system taskbar.</source>
     </message>
     <message>
         <source>Load chat history...</source>
-        <translation type="unfinished">Last inn samtalehistorikk…</translation>
+        <translation>Last inn samtalehistorikk…</translation>
     </message>
     <message>
         <source>Export to file</source>
-        <translation type="unfinished">Eksporter til fil</translation>
-    </message>
-</context>
-<context>
-    <name>GenericNetCamView</name>
-    <message>
-        <source>Tox video</source>
-        <translation>Video-Tox</translation>
+        <translation>Eksporter til fil</translation>
     </message>
     <message>
-        <source>Show Messages</source>
-        <translation>Vis meldinger</translation>
-    </message>
-    <message>
-        <source>Hide Messages</source>
-        <translation>Skjul meldinger</translation>
-    </message>
-    <message>
-        <source>Full Screen</source>
-        <translation>Fullskjermsvisning</translation>
-    </message>
-    <message>
-        <source>Toggle video preview</source>
-        <translation>Veksle videoforhåndsvisning</translation>
-    </message>
-    <message>
-        <source>Mute audio</source>
-        <translation>Forstum lyd</translation>
-    </message>
-    <message>
-        <source>Mute microphone</source>
-        <translation type="unfinished">Demp mikrofon</translation>
-    </message>
-    <message>
-        <source>End video call</source>
-        <translation type="unfinished">Avslutt videosamtale</translation>
-    </message>
-    <message>
-        <source>Exit full screen</source>
-        <translation>Avslutt fullskjermsvisning</translation>
+        <source>Are you sure that you want to clear all displayed messages?</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -1389,7 +1327,7 @@ instead of system taskbar.</source>
     </message>
     <message>
         <source>Online</source>
-        <translation type="unfinished">Pålogget</translation>
+        <translation>Pålogget</translation>
     </message>
 </context>
 <context>
@@ -1401,13 +1339,6 @@ instead of system taskbar.</source>
     <message>
         <source>Tox ID</source>
         <translation>Tox-ID</translation>
-    </message>
-    <message>
-        <source>This bunch of characters tells other Tox clients how to contact you.
-Share it with your friends to communicate.</source>
-        <comment>Tox ID tooltip</comment>
-        <translation>Denne raden med tegn forteller andre Tox-klienter hvordan de skal kontakte deg.
-Del den med venner du vil kommunisere med.</translation>
     </message>
     <message>
         <source>Your Tox ID (click to copy)</source>
@@ -1466,7 +1397,8 @@ Del den med venner du vil kommunisere med.</translation>
         <source>Allows you to export your Tox profile to a file.
 Profile does not contain your history.</source>
         <comment>tooltip for profile exporting button</comment>
-        <translation>Lar deg eksportere Tox-profilen din til en fil.</translation>
+        <translation>Lar deg eksportere Tox-profilen din til en fil.
+Profilen inneholder ikke historikken din.</translation>
     </message>
     <message>
         <source>Export</source>
@@ -1477,54 +1409,6 @@ Profile does not contain your history.</source>
         <source>Delete</source>
         <comment>delete profile button</comment>
         <translation>Slett</translation>
-    </message>
-    <message>
-        <source>Server</source>
-        <translation>Tjener</translation>
-    </message>
-    <message>
-        <source>Hide my name from the public list</source>
-        <translation>Skjul mitt navn fra offentlig navneliste</translation>
-    </message>
-    <message>
-        <source>Register</source>
-        <translation>Registrer</translation>
-    </message>
-    <message>
-        <source>Your password</source>
-        <translation>Ditt passord</translation>
-    </message>
-    <message>
-        <source>Update</source>
-        <translation>Oppdater</translation>
-    </message>
-    <message>
-        <source>Register on ToxMe</source>
-        <translation>Registrer på ToxMe</translation>
-    </message>
-    <message>
-        <source>Name for the ToxMe service.</source>
-        <comment>Tooltip for the `Username` ToxMe field.</comment>
-        <translation>Navn på ToxMe-tjeneste.</translation>
-    </message>
-    <message>
-        <source>Optional. Something about you. Or your cat.</source>
-        <comment>Tooltip for the Biography text.</comment>
-        <translation>Valgfri. Noe om deg. Eller din katt.</translation>
-    </message>
-    <message>
-        <source>Optional. Something about you. Or your cat.</source>
-        <comment>Tooltip for the Biography field.</comment>
-        <translation>Valgfri. Noe om deg. Eller din katt.</translation>
-    </message>
-    <message>
-        <source>ToxMe service to register on.</source>
-        <translation>ToxMe-tjeneste å registrere på.</translation>
-    </message>
-    <message>
-        <source>If not set, ToxMe entries are publicly visible.</source>
-        <comment>Tooltip for the `Hide my name from public list` ToxMe checkbox.</comment>
-        <translation>Hvis ikke satt, er ToxMe-oppføringer synlige offentlig.</translation>
     </message>
     <message>
         <source>Remove your password and encryption from your profile.</source>
@@ -1560,30 +1444,6 @@ Profile does not contain your history.</source>
         <translation>Kopier QR-bilde til utklippstavle</translation>
     </message>
     <message>
-        <source>ToxMe username to be shown on ToxMe</source>
-        <translation>ToxMe-brukernavn å vise på ToxMe</translation>
-    </message>
-    <message>
-        <source>Optional ToxMe biography to be shown on ToxMe</source>
-        <translation>Valgri ToxMe-biografi å vise på ToxMe</translation>
-    </message>
-    <message>
-        <source>ToxMe service address</source>
-        <translation>Tjenesteadresse for ToxMe</translation>
-    </message>
-    <message>
-        <source>Visibility on the ToxMe service</source>
-        <translation>Synlighet på ToxMe-tjeneste</translation>
-    </message>
-    <message>
-        <source>Password</source>
-        <translation>Passord</translation>
-    </message>
-    <message>
-        <source>Update ToxMe entry</source>
-        <translation>Oppdater ToxMe-oppføring</translation>
-    </message>
-    <message>
         <source>Rename profile.</source>
         <translation>Endre navn på profil.</translation>
     </message>
@@ -1612,24 +1472,18 @@ Profile does not contain your history.</source>
         <translation>Min status:</translation>
     </message>
     <message>
-        <source>My username</source>
-        <translation>Mitt brukernavn</translation>
-    </message>
-    <message>
-        <source>My biography</source>
-        <translation>Min biografi</translation>
-    </message>
-    <message>
         <source>My profile</source>
         <translation>Min profil</translation>
+    </message>
+    <message>
+        <source>This ID allows other Tox users to add and contact you.
+Share it with your friends to begin chatting.</source>
+        <comment>Tox ID tooltip</comment>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
     <name>LoadHistoryDialog</name>
-    <message>
-        <source>Load History Dialog</source>
-        <translation>Last Historikk-dialog</translation>
-    </message>
     <message>
         <source>Load history</source>
         <translation>Last inn historikk</translation>
@@ -1647,12 +1501,16 @@ Profile does not contain your history.</source>
         <translation>(omtrent 100 meldinger innlastet)</translation>
     </message>
     <message>
-        <source>Select Date Dialog</source>
-        <translation type="unfinished">Velg datodialog</translation>
+        <source>Select a date</source>
+        <translation>Velg en dato</translation>
     </message>
     <message>
-        <source>Select a date</source>
-        <translation type="unfinished">Velg en dato</translation>
+        <source>Load history dialog</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Select date dialog</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -1692,12 +1550,6 @@ Profile does not contain your history.</source>
     <message>
         <source>The password must be at least 6 characters long.</source>
         <translation>Passordet må være minst 6 tegn langt.</translation>
-    </message>
-    <message>
-        <source>The passwords you&apos;ve entered are different.
-Please make sure to enter same password twice.</source>
-        <translation>De oppgitte passordene samsvarer ikke.
-Skriv inn samme passord to ganger.</translation>
     </message>
     <message>
         <source>A profile with this name already exists.</source>
@@ -1798,6 +1650,11 @@ Det kan hende du ønsker å opprette en.</translation>
     <message>
         <source>Loading existing profile page</source>
         <translation>Laster eksisterende profilside</translation>
+    </message>
+    <message>
+        <source>The passwords you&apos;ve entered are different.
+Please make sure to enter the same password twice.</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -1904,6 +1761,45 @@ Det kan hende du ønsker å opprette en.</translation>
     </message>
 </context>
 <context>
+    <name>NetCamView</name>
+    <message>
+        <source>Tox video</source>
+        <translation type="unfinished">Video-Tox</translation>
+    </message>
+    <message>
+        <source>Full Screen</source>
+        <translation type="unfinished">Fullskjermsvisning</translation>
+    </message>
+    <message>
+        <source>Toggle video preview</source>
+        <translation type="unfinished">Veksle videoforhåndsvisning</translation>
+    </message>
+    <message>
+        <source>Mute audio</source>
+        <translation type="unfinished">Forstum lyd</translation>
+    </message>
+    <message>
+        <source>Mute microphone</source>
+        <translation type="unfinished">Demp mikrofon</translation>
+    </message>
+    <message>
+        <source>End video call</source>
+        <translation type="unfinished">Avslutt videosamtale</translation>
+    </message>
+    <message>
+        <source>Exit full screen</source>
+        <translation type="unfinished">Avslutt fullskjermsvisning</translation>
+    </message>
+    <message>
+        <source>Hide messages</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Show messages</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
     <name>Nexus</name>
     <message>
         <source>View</source>
@@ -1942,6 +1838,42 @@ Det kan hende du ønsker å opprette en.</translation>
             <numerusform>Ulest melding</numerusform>
             <numerusform>Uleste meldinger</numerusform>
         </translation>
+    </message>
+</context>
+<context>
+    <name>NotificationGenerator</name>
+    <message>
+        <source>New message</source>
+        <translation type="unfinished">Ny melding</translation>
+    </message>
+    <message>
+        <source>New group message</source>
+        <translation type="unfinished">Ny gruppemelding</translation>
+    </message>
+    <message>
+        <source>Incoming file transfer</source>
+        <translation type="unfinished">Innkommende filoverføring</translation>
+    </message>
+    <message>
+        <source>%1 - file transfer</source>
+        <extracomment>e.g. Bob - file transfer</extracomment>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Group invite received</source>
+        <translation type="unfinished">Gruppeinvitasjon mottatt</translation>
+    </message>
+    <message>
+        <source>%1 invites you to join a group.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Friend request received</source>
+        <translation type="unfinished">Venneforespørsel mottatt</translation>
+    </message>
+    <message>
+        <source>Friend request received from %1</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -2020,8 +1952,8 @@ Endringer av lagringsformat er mulig, som kan forårsake data tap.</translation>
         <translation>Svarteliste</translation>
     </message>
     <message>
-        <source>Filter group message by group member&apos;s public key. Put public key here, one per line.</source>
-        <translation>Filtrer gruppemelding etter gruppemedlemmets offentlige nøkkel. Putt offentlig nøkkel her, én per linje.</translation>
+        <source>Filter group messages by group members&apos; public keys. Put public keys here, one per line.</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -2031,12 +1963,12 @@ Endringer av lagringsformat er mulig, som kan forårsake data tap.</translation>
         <translation>Klarte ikke å utlede nøkkel fra passord, profilen vil ikke bruke det nye passordet.</translation>
     </message>
     <message>
-        <source>Couldn&apos;t change password on the database, it might be corrupted or use the old password.</source>
-        <translation>Kunne ikke endre passord på databasen, den kan være skadet eller benytte seg av det gamle passordet.</translation>
+        <source>Toxing on qTox</source>
+        <translation>Toxer på qTox</translation>
     </message>
     <message>
-        <source>Toxing on qTox</source>
-        <translation type="unfinished">Toxer på qTox</translation>
+        <source>Couldn&apos;t change database password, it may be corrupted or use the old password.</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -2078,35 +2010,12 @@ Velg et annet bilde.</translation>
         <translation>Lokasjon er ikke skrivbar</translation>
     </message>
     <message>
-        <source>You do not have permission to write that location. Choose another, or cancel the save dialog.</source>
-        <comment>text of permissions popup</comment>
-        <translation>Du har ikke skriverettigheter for den lokasjonen. Velg en annen, eller avbryt lagringsdialogen.</translation>
-    </message>
-    <message>
-        <source>Failed to copy file</source>
-        <translation>Mislyktes å kopiere fil</translation>
-    </message>
-    <message>
-        <source>The file you chose could not be written to.</source>
-        <translation>Kunne ikke skrive til filen du valgte.</translation>
-    </message>
-    <message>
-        <source>Really delete profile?</source>
-        <comment>deletion confirmation title</comment>
-        <translation>Vil du virkellig slette profilen?</translation>
-    </message>
-    <message>
         <source>Nothing to remove</source>
         <translation>Ingenting å fjerne</translation>
     </message>
     <message>
         <source>Your profile does not have a password!</source>
         <translation>Profilen din har inget passord!</translation>
-    </message>
-    <message>
-        <source>Really delete password?</source>
-        <comment>deletion confirmation title</comment>
-        <translation>Vil du virkelig slette passordet?</translation>
     </message>
     <message>
         <source>Please enter a new password.</source>
@@ -2141,38 +2050,6 @@ Velg et annet bilde.</translation>
         <translation>Filer kunne ikke slettes!</translation>
     </message>
     <message>
-        <source>Register (processing)</source>
-        <translation>Registrer (behandler)</translation>
-    </message>
-    <message>
-        <source>Update (processing)</source>
-        <translation>Oppdatering (behandler)</translation>
-    </message>
-    <message>
-        <source>Done!</source>
-        <translation>Ferdig!</translation>
-    </message>
-    <message>
-        <source>Account %1@%2 updated successfully</source>
-        <translation>Kontoen %1@%2 ble oppdatert</translation>
-    </message>
-    <message>
-        <source>Successfully added %1@%2 to the database. Save your password</source>
-        <translation>%1@%2 lagt til i databasen. Lagre passordet ditt</translation>
-    </message>
-    <message>
-        <source>Toxme error</source>
-        <translation>ToxMe-feil</translation>
-    </message>
-    <message>
-        <source>Register</source>
-        <translation>Registrer</translation>
-    </message>
-    <message>
-        <source>Update</source>
-        <translation>Oppdater</translation>
-    </message>
-    <message>
         <source>Change password</source>
         <comment>button text</comment>
         <translation>Bytt passord</translation>
@@ -2189,16 +2066,6 @@ Velg et annet bilde.</translation>
     <message>
         <source>Couldn&apos;t change password</source>
         <translation>Kunne ikke endre passord</translation>
-    </message>
-    <message>
-        <source>This bunch of characters tells other Tox clients how to contact you.
-Share it with your friends to communicate.
-
-This ID includes the NoSpam code (in blue), and the checksum (in gray).</source>
-        <translation>Dette knippet tegn forteller Tox-klienter hvordan de skal koble til deg.
-Del det med dine venner for å kommunisere.
-
-Denne ID-en inkluderer NoSpam-koden (i blått) og sjekksummen (i grått).</translation>
     </message>
     <message>
         <source>Empty path is unavaliable</source>
@@ -2229,10 +2096,6 @@ Denne ID-en inkluderer NoSpam-koden (i blått) og sjekksummen (i grått).</trans
         <translation>Tomt navn</translation>
     </message>
     <message>
-        <source>Couldn&apos;t change password on the database, it might be corrupted or use the old password.</source>
-        <translation>Kunne ikke endre passord på databasen, den kan være skadet eller bruker det gamle passordet.</translation>
-    </message>
-    <message>
         <source>Export profile</source>
         <translation>Eksporter profil</translation>
     </message>
@@ -2252,14 +2115,56 @@ Denne ID-en inkluderer NoSpam-koden (i blått) og sjekksummen (i grått).</trans
         <translation>Fjern dem manuelt.</translation>
     </message>
     <message>
-        <source>Are you sure you want to delete your password?</source>
-        <extracomment>deletion confirmation text</extracomment>
-        <translation>Er du sikker på at du vil slette passordet ditt?</translation>
-    </message>
-    <message>
         <source>Images (%1)</source>
         <comment>filetype filter</comment>
-        <translation type="unfinished">Bilder (%1)</translation>
+        <translation>Bilder (%1)</translation>
+    </message>
+    <message>
+        <source>You do not have permission to write to that location. Choose another, or cancel the save dialog.</source>
+        <comment>text of permissions popup</comment>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Failed to save file</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>The file you chose could not be saved.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Empty path is unavaliable.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Couldn&apos;t change database password, it may be corrupted or use the old password.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Tox user names cannot exceed %1 characters.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Delete profile</source>
+        <comment>deletion confirmation title</comment>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Remove password</source>
+        <comment>deletion confirmation title</comment>
+        <translation type="unfinished">Fjern passord</translation>
+    </message>
+    <message>
+        <source>Are you sure you want to remove your password?</source>
+        <extracomment>deletion confirmation text</extracomment>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>This ID allows other Tox users to add and contact you.
+Share it with your friends to begin chatting.
+
+This ID includes the NoSpam code (in blue), and the checksum (in gray).</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -2342,13 +2247,13 @@ Denne ID-en inkluderer NoSpam-koden (i blått) og sjekksummen (i grått).</trans
         <translation>Kunne ikke legge til venn</translation>
     </message>
     <message>
-        <source>%1 is not a valid Toxme address.</source>
-        <translation>%1 er ikke en gyldig ToxMe-adresse.</translation>
-    </message>
-    <message>
         <source>You can&apos;t add yourself as a friend!</source>
         <comment>When trying to add your own Tox ID as friend</comment>
         <translation>Du kan ikke legge deg selv til som venn!</translation>
+    </message>
+    <message>
+        <source>%1 is not a valid Tox address.</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -2395,46 +2300,6 @@ Denne ID-en inkluderer NoSpam-koden (i blått) og sjekksummen (i grått).</trans
         <translation>%1 her! Tox meg kanskje?</translation>
     </message>
     <message>
-        <source>Server doesn&apos;t support Toxme</source>
-        <translation>Tjeneren støtter ikke ToxMe</translation>
-    </message>
-    <message>
-        <source>You&apos;re making too many requests. Wait an hour and try again</source>
-        <translation>Du sender for mange forespørsler. Vent én time og prøv igjen</translation>
-    </message>
-    <message>
-        <source>This name is already in use</source>
-        <translation>Dette navnet er allerede i bruk</translation>
-    </message>
-    <message>
-        <source>This Tox ID is already registered under another name</source>
-        <translation>Denne Tox-ID-en er allerede registrert under et annet navn</translation>
-    </message>
-    <message>
-        <source>Please don&apos;t use a space in your name</source>
-        <translation>Ikke bruk mellomrom i navnet ditt</translation>
-    </message>
-    <message>
-        <source>Password incorrect</source>
-        <translation>Feil passord</translation>
-    </message>
-    <message>
-        <source>You can&apos;t use this name</source>
-        <translation>Du kan ikke bruke dette navnet</translation>
-    </message>
-    <message>
-        <source>Name not found</source>
-        <translation>Navn ikke funnet</translation>
-    </message>
-    <message>
-        <source>Tox ID not sent</source>
-        <translation>Tox-ID ikke sendt</translation>
-    </message>
-    <message>
-        <source>That user does not exist</source>
-        <translation>Den brukeren finnes ikke</translation>
-    </message>
-    <message>
         <source>Error</source>
         <translation>Feilmelding</translation>
     </message>
@@ -2451,18 +2316,6 @@ Denne ID-en inkluderer NoSpam-koden (i blått) og sjekksummen (i grått).</trans
         <source>Desktop</source>
         <comment>Desktop as a camera input for screen sharing</comment>
         <translation>Skrivebord</translation>
-    </message>
-    <message>
-        <source>Problem with HTTPS connection</source>
-        <translation>Problem med HTTPS-tilknytning</translation>
-    </message>
-    <message>
-        <source>Internal ToxMe error</source>
-        <translation>Intern ToxMe-feil</translation>
-    </message>
-    <message>
-        <source>Reformatting text in progress..</source>
-        <translation type="unfinished">Endring av tekstformatering pågår…</translation>
     </message>
     <message>
         <source>Starts new instance and opens the login screen.</source>
@@ -2495,27 +2348,71 @@ Denne ID-en inkluderer NoSpam-koden (i blått) og sjekksummen (i grått).</trans
     <message>
         <source>online</source>
         <comment>contact status</comment>
-        <translation type="unfinished">pålogget</translation>
+        <translation>pålogget</translation>
     </message>
     <message>
         <source>away</source>
         <comment>contact status</comment>
-        <translation type="unfinished">borte</translation>
+        <translation>borte</translation>
     </message>
     <message>
         <source>busy</source>
         <comment>contact status</comment>
-        <translation type="unfinished">opptatt</translation>
+        <translation>opptatt</translation>
     </message>
     <message>
         <source>offline</source>
         <comment>contact status</comment>
-        <translation type="unfinished">avlogget</translation>
+        <translation>avlogget</translation>
     </message>
     <message>
         <source>blocked</source>
         <comment>contact status</comment>
-        <translation type="unfinished">blokkert</translation>
+        <translation>blokkert</translation>
+    </message>
+    <message>
+        <source>Reformatting text...</source>
+        <comment>Waiting for text to be reformatted</comment>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Sets IPv6 &lt;on&gt;/&lt;off&gt;. Default is ON.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>on/off</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Sets UDP &lt;on&gt;/&lt;off&gt;. Default is ON.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Sets LAN discovery &lt;on&gt;/&lt;off&gt;. UDP off overrides. Default is ON.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Sets proxy settings. Default is NONE.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>(SOCKS5/HTTP/NONE):(ADDRESS):(PORT)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>%1 message(s) from %2 chats</source>
+        <extracomment>e.g. 3 messages from 2 chats</extracomment>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>%1 message(s) from %2</source>
+        <extracomment>e.g. 2 messages from Bob</extracomment>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>negotitating</source>
+        <comment>contact status</comment>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -2573,7 +2470,7 @@ Denne ID-en inkluderer NoSpam-koden (i blått) og sjekksummen (i grått).</trans
     <name>SearchForm</name>
     <message>
         <source>The text could not be found.</source>
-        <translation>Fant ikke teksten</translation>
+        <translation>Teksten ble ikke funnet.</translation>
     </message>
     <message>
         <source>Start</source>
@@ -2584,7 +2481,7 @@ Denne ID-en inkluderer NoSpam-koden (i blått) og sjekksummen (i grått).</trans
     <name>SearchSettingsForm</name>
     <message>
         <source>Form</source>
-        <translation type="unfinished">Skjema</translation>
+        <translation>Skjema</translation>
     </message>
     <message>
         <source>Start search:</source>
@@ -2608,7 +2505,7 @@ Denne ID-en inkluderer NoSpam-koden (i blått) og sjekksummen (i grått).</trans
     </message>
     <message>
         <source>00.00.0000</source>
-        <translation type="unfinished">00.00.0000</translation>
+        <translation>00.00.0000</translation>
     </message>
     <message>
         <source>Case sensitive</source>
@@ -2628,10 +2525,6 @@ Denne ID-en inkluderer NoSpam-koden (i blått) og sjekksummen (i grått).</trans
     <message>
         <source>Set your password</source>
         <translation>Velg ditt passord</translation>
-    </message>
-    <message>
-        <source>The password is too short</source>
-        <translation>Passordet er for kort</translation>
     </message>
     <message>
         <source>The password doesn&apos;t match.</source>
@@ -2664,6 +2557,10 @@ Denne ID-en inkluderer NoSpam-koden (i blått) og sjekksummen (i grått).</trans
     <message>
         <source>Password input field, minimum 6 characters long</source>
         <translation>Passordsinntastingsfelt, minimum 6 tegn</translation>
+    </message>
+    <message>
+        <source>The password is too short.</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -2774,11 +2671,6 @@ Denne ID-en inkluderer NoSpam-koden (i blått) og sjekksummen (i grått).</trans
         <translation>Kontaktliste</translation>
     </message>
     <message>
-        <source>If checked, groupchats will be placed at the top of the friends list, otherwise, they&apos;ll be placed below online friends.</source>
-        <comment>toolTip for groupchat positioning</comment>
-        <translation>Hvis valgt, vil gruppe-sludringer bli plassert på toppen av kontaktlisten, ellers vil de ligge under påloggede kontakter.</translation>
-    </message>
-    <message>
         <source>Place groupchats at top of friend list</source>
         <translation>Plasser gruppe-sludringer på toppen av kontaktlisten</translation>
     </message>
@@ -2806,11 +2698,6 @@ Denne ID-en inkluderer NoSpam-koden (i blått) og sjekksummen (i grått).</trans
     <message>
         <source>Use emoticons</source>
         <translation>Bruk emojier</translation>
-    </message>
-    <message>
-        <source>Smiley Pack:</source>
-        <extracomment>Text on smiley pack label</extracomment>
-        <translation>Smilefjes-pakke:</translation>
     </message>
     <message>
         <source>Emoticon size:</source>
@@ -2841,31 +2728,17 @@ Denne ID-en inkluderer NoSpam-koden (i blått) og sjekksummen (i grått).</trans
         <translation>Datoformat:</translation>
     </message>
     <message>
-        <source>If enabled every contact without an avatar set will have a generated avatar based on their Tox ID instead of a default picture. Requires restart to apply.</source>
-        <comment>toolTip for show identicons</comment>
-        <translation>Hvis aktivert, vil hver kontakt uten en avatar få en basert på deres Tox ID istedenfor standardbildet. Krever omstart for å tre i effekt.</translation>
-    </message>
-    <message>
         <source>Use identicons instead of empty avatars</source>
         <translation>Bruk identikoner istedenfor tomme avatarer</translation>
     </message>
     <message>
-        <source>Use colored nicknames in chats</source>
-        <translation>Bruk fargede kallenavn i sludringer</translation>
-    </message>
-    <message>
         <source>Show a notification when you receive a new message and the window is not selected.</source>
         <comment>tooltip for Notify setting</comment>
-        <translation type="unfinished">Vis en merknad når du mottar en ny melding, og vinduet ikke er i fokus.</translation>
+        <translation>Vis en merknad når du mottar en ny melding da vinduet ikke er i fokus.</translation>
     </message>
     <message>
         <source>Notify</source>
         <translation>Varsle</translation>
-    </message>
-    <message>
-        <source>Onlys notify about new messages in groupchats when mentioned.</source>
-        <comment>toolTip for Group chats only notify when mentioned</comment>
-        <translation>Kun varsle om nye meldinger i gruppesludringer når nevnt.</translation>
     </message>
     <message>
         <source>Group chats only notify when mentioned</source>
@@ -2873,11 +2746,11 @@ Denne ID-en inkluderer NoSpam-koden (i blått) og sjekksummen (i grått).</trans
     </message>
     <message>
         <source>Play sound</source>
-        <translation type="unfinished">Spill av lyd</translation>
+        <translation>Spill av lyd</translation>
     </message>
     <message>
         <source>Play sound while Busy</source>
-        <translation type="unfinished">Spill lyd mens opptatt</translation>
+        <translation>Spill av lyd mens du er opptatt</translation>
     </message>
     <message>
         <source>Notify via desktop notifications</source>
@@ -2886,6 +2759,30 @@ Denne ID-en inkluderer NoSpam-koden (i blått) og sjekksummen (i grått).</trans
     <message>
         <source>Hide message sender and contents</source>
         <translation>Skjul meldingsavsender og innhold</translation>
+    </message>
+    <message>
+        <source>Use colored nicknames in group chats</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Only notify about new messages in group chats when mentioned.</source>
+        <comment>toolTip for Group chats only notify when mentioned</comment>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>If checked, group chats will be placed at the top of the friends list, otherwise, they&apos;ll be placed below online friends.</source>
+        <comment>toolTip for groupchat positioning</comment>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>If enabled, every contact without an avatar will have a generated icon based on their Tox ID instead of the default picture. Requires restart to apply.</source>
+        <comment>toolTip for show identicons</comment>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Smiley pack:</source>
+        <extracomment>Text on smiley pack label</extracomment>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -2942,18 +2839,6 @@ Denne ID-en inkluderer NoSpam-koden (i blått) og sjekksummen (i grått).</trans
         <translation>Fil</translation>
     </message>
     <message>
-        <source>Edit Profile</source>
-        <translation>Rediger profil</translation>
-    </message>
-    <message>
-        <source>Change Status</source>
-        <translation>Endre status</translation>
-    </message>
-    <message>
-        <source>Log out</source>
-        <translation>Logg ut</translation>
-    </message>
-    <message>
         <source>Edit</source>
         <translation>Rediger</translation>
     </message>
@@ -2966,23 +2851,6 @@ Denne ID-en inkluderer NoSpam-koden (i blått) og sjekksummen (i grått).</trans
         <translation>Venner</translation>
     </message>
     <message>
-        <source>Add Contact...</source>
-        <translation>Legg til venn…</translation>
-    </message>
-    <message>
-        <source>Next Conversation</source>
-        <translation>Neste samtale</translation>
-    </message>
-    <message>
-        <source>Previous Conversation</source>
-        <translation>Forrige samtale</translation>
-    </message>
-    <message>
-        <source>toxcore failed to start with your proxy settings. qTox cannot run; please modify your settings and restart.</source>
-        <comment>popup text</comment>
-        <translation>toxcore mislyktes i å starte med dine proxy-innstillinger. qTox kan ikke kjøre; vennligst forandre på instillingene og restart.</translation>
-    </message>
-    <message>
         <source>Executable file</source>
         <comment>popup title</comment>
         <translation>Kjørbar fil</translation>
@@ -2991,10 +2859,6 @@ Denne ID-en inkluderer NoSpam-koden (i blått) og sjekksummen (i grått).</trans
         <source>You have asked qTox to open an executable file. Executable files can potentially damage your computer. Are you sure want to open this file?</source>
         <comment>popup text</comment>
         <translation>Du har spurt qTox om å åpne en kjørbar fil. Kjørbare filer kan forårsake skader på din maskin. Er du sikker du vil åpne denne filen?</translation>
-    </message>
-    <message>
-        <source>Couldn&apos;t request friendship</source>
-        <translation>Kunne ikke lage venneforespørsel</translation>
     </message>
     <message>
         <source>Search Contacts</source>
@@ -3009,10 +2873,6 @@ Denne ID-en inkluderer NoSpam-koden (i blått) og sjekksummen (i grått).</trans
         <translation>Mislyktes å sende melding</translation>
     </message>
     <message>
-        <source>toxcore failed to start, the application will terminate after you close this message.</source>
-        <translation>Klarte ikke å starte toxcore, programmet vil stenges etter at du lukker denne meldingen.</translation>
-    </message>
-    <message>
         <source>Your name</source>
         <translation>Ditt navn</translation>
     </message>
@@ -3024,29 +2884,10 @@ Denne ID-en inkluderer NoSpam-koden (i blått) og sjekksummen (i grått).</trans
         <source>Create new group...</source>
         <translation>Opprett ny gruppe…</translation>
     </message>
-    <message numerus="yes">
-        <source>%n New Friend Request(s)</source>
-        <translation>
-            <numerusform>%n ny venneforespørsel</numerusform>
-            <numerusform>%n nye venneforespørsler</numerusform>
-        </translation>
-    </message>
-    <message numerus="yes">
-        <source>%n New Group Invite(s)</source>
-        <translation>
-            <numerusform>%n ny gruppeinvitasjon</numerusform>
-            <numerusform>%n nye gruppeinvitasjoner</numerusform>
-        </translation>
-    </message>
     <message>
         <source>Logout</source>
         <comment>Tray action menu to logout user</comment>
         <translation>Logg ut</translation>
-    </message>
-    <message>
-        <source>Exit</source>
-        <comment>Tray action menu to exit tox</comment>
-        <translation>Avslutt</translation>
     </message>
     <message>
         <source>Show</source>
@@ -3083,16 +2924,60 @@ Denne ID-en inkluderer NoSpam-koden (i blått) og sjekksummen (i grått).</trans
         <translation>Klarte ikke å sende filen &quot;%1&quot;</translation>
     </message>
     <message>
-        <source>File sent</source>
-        <translation>Fil sendt</translation>
+        <source>Toxcore failed to start, the application will terminate after you close this message.</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
-        <source> sent you a friend request.</source>
-        <translation> sendte deg en venneforespørsel.</translation>
+        <source>Toxcore failed to start with your proxy settings. qTox cannot run; please modify your settings and restart.</source>
+        <comment>popup text</comment>
+        <translation type="unfinished"></translation>
     </message>
     <message>
-        <source> invites you to join a group.</source>
-        <translation> inviterer deg til en gruppe.</translation>
+        <source>Couldn&apos;t send friend request</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message numerus="yes">
+        <source>%n new friend request(s)</source>
+        <translation type="unfinished">
+            <numerusform></numerusform>
+            <numerusform></numerusform>
+        </translation>
+    </message>
+    <message numerus="yes">
+        <source>%n new group invite(s)</source>
+        <translation type="unfinished">
+            <numerusform></numerusform>
+            <numerusform></numerusform>
+        </translation>
+    </message>
+    <message>
+        <source>Exit</source>
+        <comment>Tray action menu to exit Tox</comment>
+        <translation type="unfinished">Avslutt</translation>
+    </message>
+    <message>
+        <source>Change status</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Edit profile</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Logout</source>
+        <translation type="unfinished">Logg ut</translation>
+    </message>
+    <message>
+        <source>Add contact...</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Next conversation</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Previous conversation</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 </TS>

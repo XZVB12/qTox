@@ -29,6 +29,7 @@ option(USE_CCACHE "Use ccache when available" ON)
 option(SPELL_CHECK "Enable spell cheching support" ON)
 option(SVGZ_ICON "Compress the SVG icon of qTox" ON)
 option(ASAN "Compile with AddressSanitizer" OFF)
+option(TSAN "Compile with ThreadSanitizer" OFF)
 option(DESKTOP_NOTIFICATIONS "Use snorenotify for desktop notifications" OFF)
 option(STRICT_OPTIONS "Enable strict compile options, used by CI" OFF)
 
@@ -44,6 +45,11 @@ endif()
 if(ASAN)
     set (CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -fno-omit-frame-pointer -fsanitize=address")
     set (CMAKE_LINKER_FLAGS_DEBUG "${CMAKE_LINKER_FLAGS_DEBUG} -fno-omit-frame-pointer -fsanitize=address")
+endif()
+
+if(TSAN)
+    set (CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -fno-omit-frame-pointer -fsanitize=thread")
+    set (CMAKE_LINKER_FLAGS_DEBUG "${CMAKE_LINKER_FLAGS_DEBUG} -fno-omit-frame-pointer -fsanitize=thread")
 endif()
 
 set(ENV{PKG_CONFIG_PATH}
@@ -104,7 +110,7 @@ if (COMPILER_SUPPORTS_WDATE_TIME)
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wdate-time")
 endif()
 
-if (NOT WIN32)
+if (NOT WIN32 AND NOT HAIKU)
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fstack-protector-all")
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wstack-protector")
 endif()
@@ -218,6 +224,8 @@ set(${PROJECT_NAME}_SOURCES
   src/chatlog/textformatter.h
   src/core/coreav.cpp
   src/core/coreav.h
+  src/core/coreext.cpp
+  src/core/coreext.h
   src/core/core.cpp
   src/core/corefile.cpp
   src/core/corefile.h
@@ -360,6 +368,8 @@ set(${PROJECT_NAME}_SOURCES
   src/widget/contentlayout.h
   src/widget/emoticonswidget.cpp
   src/widget/emoticonswidget.h
+  src/widget/extensionstatus.cpp
+  src/widget/extensionstatus.h
   src/widget/flowlayout.cpp
   src/widget/flowlayout.h
   src/widget/searchform.cpp
@@ -569,6 +579,20 @@ MESSAGE( STATUS "CMAKE_C_FLAGS: " ${CMAKE_C_FLAGS} )
 # the compiler flags for compiling C++ sources
 MESSAGE( STATUS "CMAKE_CXX_FLAGS: " ${CMAKE_CXX_FLAGS} )
 
+# Interface library to propagate code coverage flags if enabled
+add_library(coverage_config INTERFACE)
+option(CODE_COVERAGE "Enable coverage reporting" OFF)
+if (CODE_COVERAGE AND CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
+  target_compile_options(coverage_config INTERFACE -O0 -g --coverage)
+  if(CMAKE_VERSION VERSION_GREATER_EQUAL 3.13)
+    target_link_options(coverage_config INTERFACE --coverage)
+  else()
+    target_link_libraries(coverage_config INTERFACE --coverage)
+  endif()
+endif()
+
+link_libraries(coverage_config)
+
 add_subdirectory(util)
 add_subdirectory(audio)
 add_subdirectory(translations)
@@ -579,7 +603,8 @@ add_library(${PROJECT_NAME}_static
   ${${PROJECT_NAME}_SOURCES})
 target_link_libraries(${PROJECT_NAME}_static
   ${CMAKE_REQUIRED_LIBRARIES}
-  ${ALL_LIBRARIES})
+  ${ALL_LIBRARIES}
+  coverage_config)
 
 target_link_libraries(${PROJECT_NAME}_static util_library)
 target_link_libraries(${PROJECT_NAME}_static audio_library)

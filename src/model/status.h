@@ -31,7 +31,8 @@ namespace Status
         Away,
         Busy,
         Offline,
-        Blocked
+        Blocked,
+        Negotiating,
     };
 
     QString getIconPath(Status status, bool event = false);

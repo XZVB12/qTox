@@ -190,6 +190,8 @@ void renderMessageRaw(const QString& displayName, bool isSelf, bool colorizeName
     if (chatMessage) {
         if (chatLogMessage.state == MessageState::complete) {
             chatMessage->markAsDelivered(chatLogMessage.message.timestamp);
+        } else if (chatLogMessage.state == MessageState::broken) {
+            chatMessage->markAsBroken();
         }
     } else {
         chatMessage = createMessage(displayName, isSelf, colorizeNames, chatLogMessage);
@@ -402,12 +404,10 @@ void GenericChatForm::hideFileMenu()
 
 QDateTime GenericChatForm::getLatestTime() const
 {
-    return getTime(chatWidget->getLatestLine());
-}
+    if (chatLog.getFirstIdx() == chatLog.getNextIdx())
+        return QDateTime();
 
-QDateTime GenericChatForm::getFirstTime() const
-{
-    return getTime(chatWidget->getFirstLine());
+    return chatLog.at(chatLog.getNextIdx() - 1).getTimestamp();
 }
 
 void GenericChatForm::reloadTheme()
